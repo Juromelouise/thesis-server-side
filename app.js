@@ -6,6 +6,7 @@ const passport = require("passport");
 const session = require("express-session");
 
 const google = require("./router/google");
+const user = require("./router/user")
 
 app.use(
   cors({
@@ -29,5 +30,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", google);
+app.use("/user", user);
 
 module.exports = app;

@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
@@ -32,7 +31,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: false,
     select: false,
     validate: [validator.isStrongPassword, "Use a Strong Password"],
     minLength: [8, "Password must exceed more than 7 characters"],
