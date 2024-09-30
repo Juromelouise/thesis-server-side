@@ -2,6 +2,7 @@ const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
 
 exports.registerUser = async (req, res, next) => {
+  console.log(req.body)
   const user = await User.create(req.body);
   if (!user) {
     return res.status(500).json({

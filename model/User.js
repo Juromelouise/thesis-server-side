@@ -7,7 +7,7 @@ const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
   firstName: {
-    type: String, 
+    type: String,
     required: true,
     trim: true,
   },
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     select: false,
-    validate: [validator.isStrongPassword, "Use a Strong Password"],
+    validate: [validator.isStrongPassword, ""],
     minLength: [8, "Password must exceed more than 7 characters"],
   },
   avatar: {
