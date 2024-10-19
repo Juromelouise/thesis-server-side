@@ -29,7 +29,7 @@ exports.loginUser = async (req, res, next) => {
   if (!isPasswordMatched) {
     return res.status(401).json({ error: "Invalid Email or Password" });
   }
-
+  console.log(`tapos na dito`)
   sendToken(user, 200, res);
 };
 
