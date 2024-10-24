@@ -20,7 +20,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(
   session({
-    secret: "keyboard cat",
+    secret: process.env.EXPRESS_SESSION,
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false },
