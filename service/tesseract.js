@@ -1,10 +1,24 @@
 const Tesseract = require("tesseract.js");
 
-(async () => {
-  const worker = await Tesseract.createWorker();
+exports.imageExtract = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-  const { data: { text } } = await worker.recognize('C:/Thesis/System/backend/image/Capture.PNG');
-  console.log(text);
+    const imagePath = req.file.path;
+    console.log("Processing file:", imagePath);
 
-  await worker.terminate();
-})();
+
+    const {
+      data: { text },
+    } = await Tesseract.recognize(imagePath, "eng");
+    console.log("Extracted text:", text);
+
+
+    res.status(200).json({ extractedText: text });
+  } catch (error) {
+    console.error("Error extracting text:", error);
+    res.status(500).json({ message: "Error processing image" });
+  }
+};

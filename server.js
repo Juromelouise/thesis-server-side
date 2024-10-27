@@ -4,16 +4,11 @@ const cloudinary = require("cloudinary").v2;
 const mongoose = require("mongoose");
 const ngrok = require("@ngrok/ngrok");
 
-// Load environment variables from .env file
 dotenv.config({ path: "./config/.env" });
 
-// Database connection
 const connectDatabase = () => {
   mongoose
-    .connect(process.env.DB_URI, {
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true,
-    })
+    .connect(process.env.DB_URI)
     .then((con) => {
       console.log(`Connected to MongoDB with Host: ${con.connection.host}`);
     })
@@ -25,14 +20,12 @@ const connectDatabase = () => {
 
 connectDatabase();
 
-// Cloudinary configuration (if needed)
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Setting up ngrok and server listener
 const startServer = async () => {
   try {
     const tunnel = await ngrok.forward({

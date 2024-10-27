@@ -36,6 +36,16 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isStrongPassword, ""],
     minLength: [8, "Password must exceed more than 7 characters"],
   },
+  // avatar: {
+  //   public_id: {
+  //     type: String,
+  //     required: true,
+  //   },
+  //   url: {
+  //     type: String,
+  //     required: true,
+  //   },
+  // },
   avatar: {
     type: String,
   },

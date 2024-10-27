@@ -54,3 +54,7 @@ exports.profile = async (req, res) => {
     user,
   });
 };
+
+// exports.updateProfile = async (req, res) => {
+
+// };

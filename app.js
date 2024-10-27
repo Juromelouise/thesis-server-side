@@ -8,6 +8,7 @@ const session = require("express-session");
 const google = require("./router/google");
 const user = require("./router/user");
 const announce = require("./router/announcement");
+const report = require("./router/report");
 
 app.use(
   cors({
@@ -33,5 +34,6 @@ app.use(passport.session());
 app.use("/auth", google);
 app.use("/user", user);
 app.use("/announce", announce);
+app.use("/report", report);
 
 module.exports = app;
