@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const populate = require("mongoose-autopopulate");
 
 const reportSchema = new mongoose.Schema({
   plateNumber: {
@@ -13,4 +14,12 @@ const reportSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
+
+reportSchema.plugin(populate);
+
+module.exports = mongoose.model("Report", reportSchema);

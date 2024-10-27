@@ -1,92 +1,51 @@
-// Import libraries
 const natural = require("natural");
 const classifier = new natural.BayesClassifier();
-const tf = require("@tensorflow/tfjs");
-require("@tensorflow/tfjs-node");
 
-// Example training data (user reports)
-const violationReports = [
-  {
-    description: "driveway",
-    violation: "Blocking Driveway",
-  },
-  { description: "no parking zone", violation: "No Parking Zone" },
-  {
-    description: "fire hydrant",
-    violation: "Fire Hydrant Parking",
-  },
-  {
-    description: "sidewalk",
-    violation: "Sidewalk Parking",
-  },
-];
+exports.classifyReport = async (req, res, next) => {
+  const violationReports = [
+    { description: "driveway", violation: "Blocking Driveway" },
+    { description: "no parking zone", violation: "No Parking Zone" },
+    { description: "fire hydrant", violation: "Fire Hydrant Parking" },
+    { description: "sidewalk", violation: "Sidewalk Parking" },
+    { description: "crosswalk", violation: "Crosswalk Obstruction" },
+    { description: "loading zone", violation: "Loading Zone Violation" },
+    { description: "bus stop", violation: "Blocking Bus Stop" },
+    {
+      description: "handicapped spot",
+      violation: "Unauthorized Parking in Handicapped Spot",
+    },
+    { description: "intersection", violation: "Parking Near Intersection" },
+    {
+      description: "railroad crossing",
+      violation: "Parking Near Railroad Crossing",
+    },
+    { description: "curb", violation: "Parking Too Close to Curb" },
+    { description: "towed area", violation: "Parking in Towed Area" },
+    {
+      description: "vehicle obstruction",
+      violation: "Obstructing Other Vehicles",
+    },
+    { description: "street corner", violation: "Parking at Street Corner" },
+    { description: "emergency lane", violation: "Parking in Emergency Lane" },
+    { description: "bicycle lane", violation: "Blocking Bicycle Lane" },
+  ];
 
-// Training the classifier
-violationReports.forEach((report) => {
-  classifier.addDocument(report.description.toLowerCase(), report.violation);
-});
+  // Add violation descriptions to the classifier
+  violationReports.forEach((report) => {
+    classifier.addDocument(report.description.toLowerCase(), report.violation);
+  });
 
-// Train the classifier with the training data
-classifier.train();
+  classifier.train();
 
-// TensorFlow model training data (more structured for TensorFlow)
-const trainingData = violationReports.map((report) => ({
-  input: report.description.toLowerCase(),
-  output: report.violation,
-}));
+  const report = req.body.description;
 
-// Convert string inputs to numerical values
-const tokenizeText = (text) => {
-  const words = text.split(" ");
-  return words.map((word) => word.length); // Simple encoding (length of words) - can be improved
-};
-
-// Prepare input and output tensors for TensorFlow.js
-const inputs = tf.tensor2d(
-  trainingData.map((data) => tokenizeText(data.input)),
-  [trainingData.length, trainingData[0].input.split(" ").length]
-);
-const outputs = tf.oneHot(
-  trainingData.map((data) =>
-    violationReports.findIndex((v) => v.violation === data.output)
-  ),
-  violationReports.length
-);
-
-// Build and compile a TensorFlow.js model
-const model = tf.sequential();
-model.add(
-  tf.layers.dense({
-    units: 16,
-    inputShape: [inputs.shape[1]],
-    activation: "relu",
-  })
-);
-model.add(
-  tf.layers.dense({ units: violationReports.length, activation: "softmax" })
-);
-
-model.compile({
-  optimizer: "adam",
-  loss: "categoricalCrossentropy",
-  metrics: ["accuracy"],
-});
-
-// Train the TensorFlow.js model
-(async () => {
-  await model.fit(inputs, outputs, { epochs: 100 });
-})();
-
-// Function to classify new user reports and return an array of violations
-const classifyReport = (userDescription) => {
-  const descriptionTokens = userDescription.toLowerCase().split(" "); // Tokenize description
+  const descriptionTokens = report.toLowerCase().split(" ");
   const detectedViolations = [];
 
-  // Natural keyword matching
-  violationReports.forEach((report) => {
+  // Check for detected violations
+  violationReports.forEach((reportItem) => {
     let found = false;
-    // Tokenize the report description and check if any words are present in the user report
-    report.description
+    reportItem.description
       .toLowerCase()
       .split(" ")
       .forEach((word) => {
@@ -95,38 +54,25 @@ const classifyReport = (userDescription) => {
         }
       });
 
-    // If words match, add violation to the result array
     if (found) {
-      detectedViolations.push(report.violation);
+      detectedViolations.push(reportItem.violation);
     }
   });
 
-  // TensorFlow.js prediction (improves over natural matching)
-  const tokenizedDescription = tokenizeText(userDescription);
-  const inputTensor = tf.tensor2d(
-    [tokenizedDescription],
-    [1, tokenizedDescription.length]
-  );
+  // Classify the report and store it in an array for potential multiple violations
+  const predictedViolations = [];
+  const predictedViolation = classifier.classify(report.toLowerCase());
 
-  const prediction = model.predict(inputTensor);
-  const predictionIndex = prediction.argMax(-1).dataSync()[0];
-  const predictedViolation = violationReports[predictionIndex].violation;
+  // Check if the predicted violation is relevant
+  if (predictedViolation) {
+    predictedViolations.push(predictedViolation);
+  }
 
-  console.log(
-    `Report: "${userDescription}" -> Detected Violations: [${detectedViolations.join(
-      ", "
-    )}], TensorFlow Prediction: ${predictedViolation}`
-  );
+  // Combine detected and predicted violations
+  const finalViolations = [
+    ...new Set([...detectedViolations, ...predictedViolations]),
+  ];
 
-  return {
-    natural: detectedViolations,
-    tensorflow: predictedViolation,
-  };
+  console.log(finalViolations);
+  next();
 };
-
-// Example usage
-const newReport =
-  "The car is parked in front of the fire hydrant and blocking the driveway";
-const violationTypes = classifyReport(newReport);
-
-module.exports = classifyReport;
