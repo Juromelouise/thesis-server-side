@@ -72,7 +72,6 @@ exports.classifyReport = async (req, res, next) => {
   const finalViolations = [
     ...new Set([...detectedViolations, ...predictedViolations]),
   ];
-
-  console.log(finalViolations);
+  req.body.violations = finalViolations;
   next();
 };

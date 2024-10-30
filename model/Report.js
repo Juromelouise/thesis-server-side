@@ -3,16 +3,20 @@ const populate = require("mongoose-autopopulate");
 
 const reportSchema = new mongoose.Schema({
   plateNumber: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "PlateNumber",
     required: true,
+    autopopulate: true,
   },
   location: {
     type: String,
     required: true,
+    trim: true,
   },
   description: {
     type: String,
     required: true,
+    trim: true,
   },
   createdAt: {
     type: Date,

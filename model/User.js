@@ -10,18 +10,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    trim: true,
   },
   lastName: {
     type: String,
     required: true,
     trim: true,
+    trim: true,
   },
   phoneNumber: {
     type: String,
     trim: true,
+    trim: true,
   },
   address: {
     type: String,
+    trim: true,
   },
   email: {
     type: String,
