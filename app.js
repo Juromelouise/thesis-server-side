@@ -8,6 +8,7 @@ const session = require("express-session");
 const google = require("./router/google");
 const user = require("./router/user");
 const announce = require("./router/announcement");
+const report = require("./router/report");
 
 app.use(
   cors({
@@ -20,7 +21,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(
   session({
-    secret: "keyboard cat",
+    secret: process.env.EXPRESS_SESSION,
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false },
@@ -33,5 +34,6 @@ app.use(passport.session());
 app.use("/auth", google);
 app.use("/user", user);
 app.use("/announce", announce);
+app.use("/report", report);
 
 module.exports = app;

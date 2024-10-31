@@ -2,6 +2,7 @@ const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
 
 exports.registerUser = async (req, res, next) => {
+  console.log(req.body);
   const user = await User.create(req.body);
   if (!user) {
     return res.status(500).json({
@@ -28,11 +29,11 @@ exports.loginUser = async (req, res, next) => {
   if (!isPasswordMatched) {
     return res.status(401).json({ error: "Invalid Email or Password" });
   }
-
+  console.log(`tapos na dito`);
   sendToken(user, 200, res);
 };
 
-exports.logout = async (req, res, next) => {        
+exports.logout = async (req, res, next) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
@@ -42,4 +43,18 @@ exports.logout = async (req, res, next) => {
     success: true,
     message: "Logged out",
   });
+
+  console.log("logout");
 };
+
+exports.profile = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    user,
+  });
+};
+
+// exports.updateProfile = async (req, res) => {
+
+// };
