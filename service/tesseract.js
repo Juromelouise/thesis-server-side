@@ -9,12 +9,10 @@ exports.imageExtract = async (req, res, next) => {
     const imagePath = req.file.path;
     console.log("Processing file:", imagePath);
 
-
     const {
       data: { text },
     } = await Tesseract.recognize(imagePath, "eng");
     console.log("Extracted text:", text);
-
 
     res.status(200).json({ extractedText: text });
   } catch (error) {

@@ -6,7 +6,13 @@ const plateNumberSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  violations: [],
+  violations: [
+    {
+      type: String,
+      trim: true,
+      required: true,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

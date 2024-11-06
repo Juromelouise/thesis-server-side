@@ -2,6 +2,7 @@ const natural = require("natural");
 const classifier = new natural.BayesClassifier();
 
 exports.classifyReport = async (req, res, next) => {
+
   const violationReports = [
     { description: "driveway", violation: "Blocking Driveway" },
     { description: "no parking zone", violation: "No Parking Zone" },
