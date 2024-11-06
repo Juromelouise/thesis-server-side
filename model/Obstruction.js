@@ -1,16 +1,10 @@
 const mongoose = require("mongoose");
 const populate = require("mongoose-autopopulate");
 
-const reportSchema = new mongoose.Schema({
+const obstructionSchema = new mongoose.Schema({
   reporter: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
-    autopopulate: true,
-  },
-  plateNumber: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "PlateNumber",
     required: true,
     autopopulate: true,
   },
@@ -24,6 +18,7 @@ const reportSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  violations: [],
   images: [
     {
       public_id: {
@@ -42,6 +37,5 @@ const reportSchema = new mongoose.Schema({
   },
 });
 
-reportSchema.plugin(populate);
-
-module.exports = mongoose.model("Report", reportSchema);
+obstructionSchema.plugin(populate);
+module.exports = mongoose.model("Obstruction", obstructionSchema);
