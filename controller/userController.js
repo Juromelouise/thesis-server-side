@@ -1,18 +1,21 @@
 const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
+const { uploadSingle } = require("../utils/cloudinaryUploader");
 
-exports.registerUser = async (req, res, next) => {
-  console.log(req.body);
-  const user = await User.create(req.body);
-  if (!user) {
-    return res.status(500).json({
-      status: false,
-      message: "User not Created",
-    });
+exports.registerUser = async (req, res) => {
+  try {
+    // console.log(req.file)
+    const image = await uploadSingle(req.file.path, "Avatar");
+    console.log(image)
+    req.body.avatar = image;
+    console.log(req.body)
+    const user = await User.create(req.body);
+    sendToken(user, 200, res);
+  } catch (e) {
+    console.log("Error in Creating user: " + e);
+    res.status(500).json({ message: "Error in Register User" });
   }
-  sendToken(user, 200, res);
 };
-
 exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
