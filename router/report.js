@@ -3,10 +3,14 @@ const upload = require("../utils/multer");
 
 const { imageExtract } = require("../service/tesseract");
 const { classifyReport } = require("../service/classifier");
-const { createReport } = require("../controller/reportController");
+const {
+  createReport,
+  updateReport,
+  deleteReport,
+} = require("../controller/reportController");
 const { isAuthenticated } = require("../middleware/auth");
-const { createObstruction } = require("../controller/obstructionController");
-const { getData } = require("../controller/obsrepController");
+const { createObstruction, updateObstruction, deleteObstruction } = require("../controller/obstructionController");
+const { getData, getAllData } = require("../controller/obsrepController");
 //POST
 router.post("/extract/text", upload.single("imageReport"), imageExtract);
 router.post(
@@ -25,5 +29,24 @@ router.post(
 );
 //GET
 router.get("/fetch/all", isAuthenticated, getData);
+router.get("/fetch/all/reports", isAuthenticated, getAllData);
+//PUT
+router.put(
+  "/update/report/:id",
+  upload.array("images"),
+  isAuthenticated,
+  classifyReport,
+  updateReport
+);
+router.put(
+  "/update/obstruction/:id",
+  upload.array("images"),
+  isAuthenticated,
+  classifyReport,
+  updateObstruction
+);
+//delete
+router.delete("/delete/report/:id", isAuthenticated, deleteReport);
+router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 
 module.exports = router;
