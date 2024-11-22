@@ -8,7 +8,10 @@ dotenv.config({ path: "./config/.env" });
 
 const connectDatabase = () => {
   mongoose
-    .connect(process.env.DB_URI)
+    .connect(process.env.DB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
     .then((con) => {
       console.log(`Connected to MongoDB with Host: ${con.connection.host}`);
     })
@@ -28,16 +31,16 @@ cloudinary.config({
 
 const startServer = async () => {
   try {
-    const tunnel = await ngrok.forward({
-      addr: 4000,
-      authtoken_from_env: true,
-    });
+  //   const tunnel = await ngrok.forward({
+  //     addr: 4000,
+  //     authtoken_from_env: true,
+  //   });
 
-    console.log(`ngrok tunnel established at: ${tunnel.url()}`);
+  //   console.log(`ngrok tunnel established at: ${tunnel.url()}`);
 
     app.listen(4000, () => {
       console.log(
-        `Server is running on port 4000. Public URL: ${tunnel.url()}`
+        `Server is running on port 4000.`
       );
     });
   } catch (error) {
