@@ -7,7 +7,7 @@ exports.createReport = async (req, res) => {
     const reporter = req.user.id;
     const { location, description, plateNumber, violations } = req.body;
     const images = await uploadMultiple(req.files, "ReportImages");
-    console.log(images);
+    // console.log(images);
 
     const plate = await PlateNumber.create({ plateNumber, violations });
 
@@ -26,5 +26,42 @@ exports.createReport = async (req, res) => {
   } catch (e) {
     console.error("Error in creating report:", e);
     res.status(500).json({ error: "Failed to create report" });
+  }
+};
+
+exports.updateReport = async (req, res) => {
+  try {
+    console.log(req.params.id);
+    const { location, description, plateNumber, violations } = req.body;
+    let images = [];
+    if (req.files?.length > 0) {
+      images = await uploadMultiple(req.files, "ReportImages");
+    }
+    const plate = await PlateNumber.create({ plateNumber, violations });
+    console.log(plate);
+
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { location, description, images, plateNumber: plate._id },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    res.status(201).json({ message: "Report is Updated", report: report });
+  } catch (e) {
+    console.log("Error in Updated Report:" + e);
+    res.status(500).json({ message: "Error in updating report" });
+  }
+};
+
+exports.deleteReport = async (req, res) => {
+  try {
+    console.log(req.params.id);
+    await Report.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true });
+  } catch (e) {
+    console.log("Error in deleting report: " + e);
+    res.status(500).json({ message: "Error in deleting report" });
   }
 };

@@ -2,6 +2,7 @@ const passport = require("passport");
 require("../googleAuth");
 const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
+const { uploadSingle } = require("../utils/cloudinaryUploader");
 
 exports.google = (req, res, next) => {
   passport.authenticate("google", { scope: ["email", "profile"] })(
@@ -66,12 +67,15 @@ exports.mobile = async (req, res) => {
   const firstName = req.body.given_name;
   const lastName = req.body.family_name;
   const email = req.body.email;
-  const avatar = req.body.picture;
+  const avatar = await uploadSingle(req.body.picture);
+  // console.log(avatar)
+  // const avatar = req.body.picture;
 
   const body = { firstName, lastName, email, avatar };
 
   try {
     // Check if the user exists in the database
+
     const loginUser = await User.findOne({ email });
 
     if (loginUser) {

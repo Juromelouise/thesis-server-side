@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const upload = require("../utils/multer");
 
 const {
   registerUser,
@@ -9,7 +10,7 @@ const {
 
 const { isAuthenticated } = require("../middleware/auth");
 
-router.post("/register", registerUser);
+router.post("/register", upload.single("avatar", 1), registerUser);
 router.post("/login", loginUser);
 router.get("/logout", logout);
 router.get("/profile", isAuthenticated, profile);
