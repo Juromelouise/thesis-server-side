@@ -65,3 +65,14 @@ exports.deleteReport = async (req, res) => {
     res.status(500).json({ message: "Error in deleting report" });
   }
 };
+
+exports.getAllDataAdmin = async (req, res) => {
+  try {
+    const data = await Report.find();
+    console.log(data);
+    res.status(200).json({ data });
+  } catch (e) {
+    console.log("Error in deleting report: " + e);
+    res.status(500).json({ message: "Error in deleting report" });
+  }
+};

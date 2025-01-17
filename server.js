@@ -2,7 +2,6 @@ const app = require("./app");
 const dotenv = require("dotenv");
 const cloudinary = require("cloudinary").v2;
 const mongoose = require("mongoose");
-const ngrok = require("@ngrok/ngrok");
 
 dotenv.config({ path: "./config/.env" });
 
@@ -31,17 +30,8 @@ cloudinary.config({
 
 const startServer = async () => {
   try {
-  //   const tunnel = await ngrok.forward({
-  //     addr: 4000,
-  //     authtoken_from_env: true,
-  //   });
-
-  //   console.log(`ngrok tunnel established at: ${tunnel.url()}`);
-
     app.listen(4000, () => {
-      console.log(
-        `Server is running on port 4000.`
-      );
+      console.log(`Server is running on port 4000.`);
     });
   } catch (error) {
     console.error("Error establishing ngrok tunnel:", error);

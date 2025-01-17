@@ -61,3 +61,14 @@ exports.deleteObstruction = async (req, res) => {
     res.status(500).json({ message: "Error in deleting obstruction" });
   }
 };
+
+exports.getAllobstructions = async (req, res) => {
+  try {
+    const obstructions = await Obstruction.find();
+    console.log(obstructions);
+    res.status(200).json({ obstructions });
+  } catch (e) {
+    console.log("Error in getting all obstructions: " + e);
+    res.status(500).json({ message: "Error in getting all obstructions" });
+  }
+}

@@ -7,9 +7,10 @@ const {
   createReport,
   updateReport,
   deleteReport,
+  getAllDataAdmin,
 } = require("../controller/reportController");
 const { isAuthenticated } = require("../middleware/auth");
-const { createObstruction, updateObstruction, deleteObstruction } = require("../controller/obstructionController");
+const { createObstruction, updateObstruction, deleteObstruction, getAllobstructions } = require("../controller/obstructionController");
 const { getData, getAllData } = require("../controller/obsrepController");
 //POST
 router.post("/extract/text", upload.single("imageReport"), imageExtract);
@@ -48,5 +49,9 @@ router.put(
 //delete
 router.delete("/delete/report/:id", isAuthenticated, deleteReport);
 router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
+
+//ADMIN
+router.get("/admin/report", getAllDataAdmin)
+router.get("/admin/obstruction", getAllobstructions)
 
 module.exports = router;
