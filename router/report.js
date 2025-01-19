@@ -30,7 +30,8 @@ router.post(
 );
 //GET
 router.get("/fetch/all", isAuthenticated, getData);
-router.get("/fetch/all/reports", isAuthenticated, getAllData);
+// router.get("/fetch/all/reports", isAuthenticated, getAllData);
+router.get("/fetch/all/reports", getAllData);
 //PUT
 router.put(
   "/update/report/:id",
