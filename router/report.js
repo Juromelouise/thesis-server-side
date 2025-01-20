@@ -8,6 +8,7 @@ const {
   updateReport,
   deleteReport,
   getAllDataAdmin,
+  getSingleReport
 } = require("../controller/reportController");
 const { isAuthenticated } = require("../middleware/auth");
 const { createObstruction, updateObstruction, deleteObstruction, getAllobstructions } = require("../controller/obstructionController");
@@ -31,7 +32,7 @@ router.post(
 //GET
 router.get("/fetch/all", isAuthenticated, getData);
 // router.get("/fetch/all/reports", isAuthenticated, getAllData);
-router.get("/fetch/all/reports", getAllData);
+// router.get("/fetch/all/reports", getAllData);
 //PUT
 router.put(
   "/update/report/:id",
@@ -54,5 +55,6 @@ router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 //ADMIN
 router.get("/admin/report", getAllDataAdmin)
 router.get("/admin/obstruction", getAllobstructions)
+router.get("/admin/report/:id", getSingleReport)
 
 module.exports = router;
