@@ -31,6 +31,11 @@ const obstructionSchema = new mongoose.Schema({
       },
     },
   ],
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Disapproved", "Resolved"],
+    default: "Pending",
+  },
   createdAt: {
     type: Date,
     default: Date.now,

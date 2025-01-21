@@ -71,4 +71,15 @@ exports.getAllobstructions = async (req, res) => {
     console.log("Error in getting all obstructions: " + e);
     res.status(500).json({ message: "Error in getting all obstructions" });
   }
-}
+};
+
+exports.getSingleObstruction = async (req, res) => {
+  try {
+    const obstruction = await Obstruction.findById(req.params.id);
+    res.status(200).json({ data: obstruction });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error on Fetching Obstruction Data" });
+  }
+};
+

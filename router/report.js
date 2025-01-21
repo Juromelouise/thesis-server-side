@@ -8,10 +8,16 @@ const {
   updateReport,
   deleteReport,
   getAllDataAdmin,
-  getSingleReport
+  getSingleReport,
 } = require("../controller/reportController");
-const { isAuthenticated } = require("../middleware/auth");
-const { createObstruction, updateObstruction, deleteObstruction, getAllobstructions } = require("../controller/obstructionController");
+const { isAuthenticated, Admin } = require("../middleware/auth");
+const {
+  createObstruction,
+  updateObstruction,
+  deleteObstruction,
+  getAllobstructions,
+  getSingleObstruction,
+} = require("../controller/obstructionController");
 const { getData, getAllData } = require("../controller/obsrepController");
 //POST
 router.post("/extract/text", upload.single("imageReport"), imageExtract);
@@ -32,7 +38,7 @@ router.post(
 //GET
 router.get("/fetch/all", isAuthenticated, getData);
 // router.get("/fetch/all/reports", isAuthenticated, getAllData);
-// router.get("/fetch/all/reports", getAllData);
+router.get("/fetch/all/reports", getAllData);
 //PUT
 router.put(
   "/update/report/:id",
@@ -53,8 +59,9 @@ router.delete("/delete/report/:id", isAuthenticated, deleteReport);
 router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 
 //ADMIN
-router.get("/admin/report", getAllDataAdmin)
-router.get("/admin/obstruction", getAllobstructions)
-router.get("/admin/report/:id", getSingleReport)
+router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
+router.get("/admin/obstruction",isAuthenticated, Admin, getAllobstructions);
+router.get("/admin/report/:id",isAuthenticated, Admin, getSingleReport);
+router.get("/admin/obstruction/:id",isAuthenticated, Admin, getSingleObstruction);
 
 module.exports = router;
