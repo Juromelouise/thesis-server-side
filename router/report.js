@@ -9,6 +9,7 @@ const {
   deleteReport,
   getAllDataAdmin,
   getSingleReport,
+  updateReportStatus
 } = require("../controller/reportController");
 const { isAuthenticated, Admin } = require("../middleware/auth");
 const {
@@ -63,5 +64,6 @@ router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
 router.get("/admin/obstruction",isAuthenticated, Admin, getAllobstructions);
 router.get("/admin/report/:id",isAuthenticated, Admin, getSingleReport);
 router.get("/admin/obstruction/:id",isAuthenticated, Admin, getSingleObstruction);
+router.put("/admin/report/status/:id",isAuthenticated, Admin, updateReportStatus);
 
 module.exports = router;

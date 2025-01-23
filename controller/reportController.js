@@ -89,3 +89,22 @@ exports.getSingleReport = async (req, res) => {
     res.status(500).json({ message: "Error in fetching report" });
   }
 };
+
+exports.updateReportStatus = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    console.log(report);
+
+    res.status(200).json({ report });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
