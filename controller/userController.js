@@ -1,22 +1,29 @@
 const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
 const { uploadSingle } = require("../utils/cloudinaryUploader");
+const path = require('path');
 
 exports.registerUser = async (req, res) => {
+  console.log(req.body);
   try {
-    // console.log(req.file)
-    const image = await uploadSingle(req.file.path, "Avatar");
-    console.log(image)
+    let image;
+    if (req.file) {
+      image = await uploadSingle(req.file.path, "Avatar");
+    } else {
+      const defaultAvatarPath = path.join(__dirname, '../image/defaultavatar.jpg');
+      image = await uploadSingle(defaultAvatarPath, "Avatar");
+    }
     req.body.avatar = image;
-    console.log(req.body)
+    console.log(req.body);
     const user = await User.create(req.body);
-    sendToken(user, 200, res);
+    sendToken(user, 200, res);  
   } catch (e) {
     console.log("Error in Creating user: " + e);
     res.status(500).json({ message: "Error in Register User" });
   }
 };
 exports.loginUser = async (req, res, next) => {
+  console.log(req.body);
   const { email, password } = req.body;
 
   if (!email || !password) {

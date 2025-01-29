@@ -65,3 +65,64 @@ exports.deleteReport = async (req, res) => {
     res.status(500).json({ message: "Error in deleting report" });
   }
 };
+
+exports.getAllDataAdmin = async (req, res) => {
+  try {
+    const data = await Report.find();
+    // const data = await Report.find();
+    console.log(data);
+    res.status(200).json({ data });
+  } catch (e) {
+    console.log("Error in deleting report: " + e);
+    res.status(500).json({ message: "Error in deleting report" });
+  }
+};
+
+exports.getSingleReport = async (req, res) => {
+  try {
+    const report = await Report.findById(req.params.id);
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    res.status(200).json({ report });
+  } catch (error) {
+    console.error("Error fetching report:", error);
+    res.status(500).json({ message: "Error in fetching report" });
+  }
+};
+
+exports.updateReportStatus = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    console.log(report);
+
+    res.status(200).json({ report });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+exports.editableStatus = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { editableStatus: false },
+      { new: true }
+    );
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    res.status(200).json({ report });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

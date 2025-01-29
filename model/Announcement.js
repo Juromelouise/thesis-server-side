@@ -6,14 +6,14 @@ const announcementSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  body: {
+  description: {
     type: String,
     required: true,
     trim: true,
   },
-  picture: {
-    type: String,
-  },
+  // picture: {
+  //   type: String,
+  // },
   createdAt: {
     type: Date,
     default: Date.now,

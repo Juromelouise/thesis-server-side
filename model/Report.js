@@ -36,6 +36,17 @@ const reportSchema = new mongoose.Schema({
       },
     },
   ],
+  status: {
+    type: String,
+    required: true,
+    enum: ["Pending", "Approved", "Disapproved", "Resolved"],
+    default: "Pending",
+  },
+  editableStatus: {
+    type: Boolean,
+    default: true,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

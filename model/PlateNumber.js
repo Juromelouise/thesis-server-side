@@ -13,6 +13,10 @@ const plateNumberSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  count:{
+    type: Number,
+    default: 1,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

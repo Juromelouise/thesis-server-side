@@ -17,8 +17,13 @@ exports.getData = async (req, res) => {
 
 exports.getAllData = async (req, res) => {
   try {
-    const reports = await Report.find();
-    const obstructions = await Obstruction.find();
+    const { page = 1, limit = 10 } = req.query;
+    const reports = await Report.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    const obstructions = await Obstruction.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
 
     const data = [...reports, ...obstructions];
     res.status(200).json({ data: data });
