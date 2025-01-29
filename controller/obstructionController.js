@@ -83,3 +83,19 @@ exports.getSingleObstruction = async (req, res) => {
   }
 };
 
+exports.editableStatusObs = async (req, res) => {
+  try {
+    const obstruction = await Obstruction.findByIdAndUpdate(
+      req.params.id,
+      { editableStatus: false },
+      { new: true }
+    );
+    if (!obstruction) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    res.status(200).json({ obstruction });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};

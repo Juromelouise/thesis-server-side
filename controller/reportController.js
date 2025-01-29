@@ -69,6 +69,7 @@ exports.deleteReport = async (req, res) => {
 exports.getAllDataAdmin = async (req, res) => {
   try {
     const data = await Report.find();
+    // const data = await Report.find();
     console.log(data);
     res.status(200).json({ data });
   } catch (e) {
@@ -105,6 +106,23 @@ exports.updateReportStatus = async (req, res) => {
 
     res.status(200).json({ report });
   } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+exports.editableStatus = async (req, res) => {
+  try {
+    const report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { editableStatus: false },
+      { new: true }
+    );
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+    res.status(200).json({ report });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error", error });
   }
 };

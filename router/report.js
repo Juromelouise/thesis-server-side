@@ -9,7 +9,8 @@ const {
   deleteReport,
   getAllDataAdmin,
   getSingleReport,
-  updateReportStatus
+  updateReportStatus,
+  editableStatus,
 } = require("../controller/reportController");
 const { isAuthenticated, Admin } = require("../middleware/auth");
 const {
@@ -18,6 +19,7 @@ const {
   deleteObstruction,
   getAllobstructions,
   getSingleObstruction,
+  editableStatusObs,
 } = require("../controller/obstructionController");
 const { getData, getAllData } = require("../controller/obsrepController");
 //POST
@@ -61,9 +63,31 @@ router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 
 //ADMIN
 router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
-router.get("/admin/obstruction",isAuthenticated, Admin, getAllobstructions);
-router.get("/admin/report/:id",isAuthenticated, Admin, getSingleReport);
-router.get("/admin/obstruction/:id",isAuthenticated, Admin, getSingleObstruction);
-router.put("/admin/report/status/:id",isAuthenticated, Admin, updateReportStatus);
+router.get("/admin/obstruction", isAuthenticated, Admin, getAllobstructions);
+router.get("/admin/report/:id", isAuthenticated, Admin, getSingleReport);
+router.get(
+  "/admin/obstruction/:id",
+  isAuthenticated,
+  Admin,
+  getSingleObstruction
+);
+router.put(
+  "/admin/report/status/:id",
+  isAuthenticated,
+  Admin,
+  updateReportStatus
+);
+router.put(
+  "/admin/obstruction/status/:id",
+  isAuthenticated,
+  Admin,
+  editableStatusObs
+);
+router.put(
+  "/admin/report/editable/:id",
+  isAuthenticated,
+  Admin,
+  editableStatus
+);
 
 module.exports = router;

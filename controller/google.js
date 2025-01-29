@@ -1,6 +1,7 @@
 const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
 const { uploadSingle } = require("../utils/cloudinaryUploader");
+const bcrypt = require("bcrypt");
 
 exports.mobile = async (req, res) => {
   console.log(req.body);
@@ -23,6 +24,12 @@ exports.mobile = async (req, res) => {
       sendToken(loginUser, 200, res);
     } else {
       // If user does not exist, create a new user
+      const randomPassword = Math.random().toString(36).slice(-8);
+      console.log(randomPassword);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+      body.password = hashedPassword;
       const newUser = await User.create(body);
 
       if (!newUser) {
@@ -59,6 +66,14 @@ exports.google = async (req, res, next) => {
       sendToken(loginUser, 200, res);
     } else {
       // If user does not exist, create a new user
+      // Generate a random password with a minimum length of 8 characters
+      const randomPassword = Math.random().toString(36).slice(-8);
+      console.log(randomPassword);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+      body.password = hashedPassword;
+
       const newUser = await User.create(body);
 
       if (!newUser) {

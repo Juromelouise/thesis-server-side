@@ -39,3 +39,16 @@ exports.showAnnouncement = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.showAnnouncementById = async (req, res) => {
+  try {
+    console.log(req.params)
+    const { id } = req.params;
+    const announcement = await Announcement.findById(id);
+    console.log(announcement);
+    res.status(200).json({ announcement });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
