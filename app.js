@@ -8,6 +8,7 @@ const google = require("./router/google");
 const user = require("./router/user");
 const announce = require("./router/announcement");
 const report = require("./router/report");
+const plateNumber = require("./router/plateNumber");
 
 // app.use(
 //   cors({
@@ -35,5 +36,6 @@ app.use("/auth", google);
 app.use("/user", user);
 app.use("/announce", announce);
 app.use("/report", report);
+app.use("/plate", plateNumber);
 
 module.exports = app;

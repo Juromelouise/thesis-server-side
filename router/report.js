@@ -10,7 +10,7 @@ const {
   getAllDataAdmin,
   getSingleReport,
   updateReportStatus,
-  editableStatus,
+  // editableStatus,
 } = require("../controller/reportController");
 const { isAuthenticated, Admin } = require("../middleware/auth");
 const {
@@ -20,6 +20,7 @@ const {
   getAllobstructions,
   getSingleObstruction,
   editableStatusObs,
+  updateObstructionViolations
 } = require("../controller/obstructionController");
 const { getData, getAllData } = require("../controller/obsrepController");
 //POST
@@ -84,10 +85,10 @@ router.put(
   editableStatusObs
 );
 router.put(
-  "/admin/report/editable/:id",
+  "/admin/obstruction/violations/:id",
   isAuthenticated,
   Admin,
-  editableStatus
+  updateObstructionViolations
 );
 
 module.exports = router;

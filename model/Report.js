@@ -43,8 +43,8 @@ const reportSchema = new mongoose.Schema({
     default: "Pending",
   },
   editableStatus: {
-    type: Boolean,
-    default: true,
+    type: Number,
+    default: 0,
     required: true,
   },
   createdAt: {
