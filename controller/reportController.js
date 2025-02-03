@@ -93,11 +93,21 @@ exports.getSingleReport = async (req, res) => {
 
 exports.updateReportStatus = async (req, res) => {
   try {
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
+    let report;
+    const editableStatus = await Report.findById(req.params.id);
+
+    if (editableStatus.editableStatus < 3) {
+      report = await Report.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: req.body.status,
+          editableStatus: editableStatus.editableStatus + 1,
+        },
+        { new: true }
+      );
+    } else {
+      return res.status(400).json({ message: "Report status can be updated only three times" });
+    }
 
     if (!report) {
       return res.status(404).json({ message: "Report not found" });
@@ -110,19 +120,19 @@ exports.updateReportStatus = async (req, res) => {
   }
 };
 
-exports.editableStatus = async (req, res) => {
-  try {
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { editableStatus: false },
-      { new: true }
-    );
-    if (!report) {
-      return res.status(404).json({ message: "Report not found" });
-    }
-    res.status(200).json({ report });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+// exports.editableStatus = async (req, res) => {
+//   try {
+//     const report = await Report.findByIdAndUpdate(
+//       req.params.id,
+//       { editableStatus: false },
+//       { new: true }
+//     );
+//     if (!report) {
+//       return res.status(404).json({ message: "Report not found" });
+//     }
+//     res.status(200).json({ report });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: "Server error", error });
+//   }
+// };

@@ -38,10 +38,22 @@ const obstructionSchema = new mongoose.Schema({
     default: "Pending",
   },
   editableStatus: {
-    type: Boolean,
-    default: true,
+    type: Number,
+    default: 0,
     required: true,
   },
+  confirmationImages: [
+    {
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

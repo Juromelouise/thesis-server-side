@@ -1,5 +1,6 @@
 const Report = require("../model/Report");
 const Obstruction = require("../model/Obstruction");
+const { uploadMultiple } = require("../utils/cloudinaryUploader");
 
 exports.getData = async (req, res) => {
   try {
@@ -30,5 +31,43 @@ exports.getAllData = async (req, res) => {
   } catch (e) {
     console.log(e.message);
     res.status(500).json({ message: "Error on Fetching All Report Data" });
+  }
+};
+
+exports.getAllDataApproved = async (req, res) => {
+  try {
+    const report = await Report.find({ status: "Approved" });
+    const obstruction = await Obstruction.find({ status: "Approved" });
+    const data = [...report, ...obstruction];
+    res.status(200).json({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error on Fetching All Approved Data" });
+  }
+};
+
+exports.updateStatusResolved = async (req, res) => {
+  try {
+    const { status } = req.body;
+    // console.log(req.params.id);
+    
+    const images = await uploadMultiple(req.files, "ConfirmationImages");
+    let report = await Report.findByIdAndUpdate(
+      req.params.id,
+      { status, confirmationImages: images },
+      { new: true }
+    );
+    if (!report) {
+      report = await Obstruction.findByIdAndUpdate(
+        req.params.id,
+        { status, confirmationImages: images },
+        { new: true }
+      );
+    }
+    console.log(report);
+    res.status(200).json({ message: "Status Updated to Resolved" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error on Updating Status to Resolved" });
   }
 };
