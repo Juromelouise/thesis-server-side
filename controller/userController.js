@@ -4,7 +4,7 @@ const { uploadSingle } = require("../utils/cloudinaryUploader");
 const path = require('path');
 
 exports.registerUser = async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   try {
     let image;
     if (req.file) {
@@ -14,11 +14,11 @@ exports.registerUser = async (req, res) => {
       image = await uploadSingle(defaultAvatarPath, "Avatar");
     }
     req.body.avatar = image;
-    console.log(req.body);
     const user = await User.create(req.body);
+    console.log(user);
     sendToken(user, 200, res);  
   } catch (e) {
-    console.log("Error in Creating user: " + e);
+    console.log("Error in Creating user: " + e.message);
     res.status(500).json({ message: "Error in Register User" });
   }
 };
