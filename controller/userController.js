@@ -1,7 +1,8 @@
 const User = require("../model/User");
 const sendToken = require("../utils/jwtToken");
 const { uploadSingle } = require("../utils/cloudinaryUploader");
-const path = require('path');
+const path = require("path");
+const { URLSearchParams } = require("url");
 
 exports.registerUser = async (req, res) => {
   // console.log(req.body);
@@ -10,37 +11,45 @@ exports.registerUser = async (req, res) => {
     if (req.file) {
       image = await uploadSingle(req.file.path, "Avatar");
     } else {
-      const defaultAvatarPath = path.join(__dirname, '../image/defaultavatar.jpg');
+      const defaultAvatarPath = path.join(
+        __dirname,
+        "../image/defaultavatar.jpg"
+      );
       image = await uploadSingle(defaultAvatarPath, "Avatar");
     }
     req.body.avatar = image;
     const user = await User.create(req.body);
     console.log(user);
-    sendToken(user, 200, res);  
+    sendToken(user, 200, res);
   } catch (e) {
     console.error("Error in Creating user: ", e);
     res.status(500).json({ message: "Error in Register User" });
   }
 };
 exports.loginUser = async (req, res, next) => {
-  console.log(req.body);
-  const { email, password } = req.body;
+  try {
+    console.log(req.body);
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Please enter email & password" });
-  }
-  const user = await User.findOne({ email }).select("+password");
+    if (!email || !password) {
+      return res.status(400).json({ error: "Please enter email & password" });
+    }
+    const user = await User.findOne({ email }).select("+password");
 
-  if (!user) {
-    return res.status(401).json({ error: "Invalid Email or Password" });
-  }
-  const isPasswordMatched = await user.comparePassword(password);
+    if (!user) {
+      return res.status(401).json({ error: "Invalid Email or Password" });
+    }
+    const isPasswordMatched = await user.comparePassword(password);
 
-  if (!isPasswordMatched) {
-    return res.status(401).json({ error: "Invalid Email or Password" });
+    if (!isPasswordMatched) {
+      return res.status(401).json({ error: "Invalid Email or Password" });
+    }
+    console.log(user);
+    sendToken(user, 200, res);
+  } catch (error) {
+    console.error("Error in Login User: ", error);
+    res.status(500).json({ message: "Error in Login User" });
   }
-  console.log(`tapos na dito`);
-  sendToken(user, 200, res);
 };
 
 exports.logout = async (req, res, next) => {
