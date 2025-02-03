@@ -18,7 +18,7 @@ exports.registerUser = async (req, res) => {
     console.log(user);
     sendToken(user, 200, res);  
   } catch (e) {
-    console.log("Error in Creating user: " + e.message);
+    console.error("Error in Creating user: ", e);
     res.status(500).json({ message: "Error in Register User" });
   }
 };
