@@ -20,9 +20,14 @@ const {
   getAllobstructions,
   getSingleObstruction,
   editableStatusObs,
-  updateObstructionViolations
+  updateObstructionViolations,
 } = require("../controller/obstructionController");
-const { getData, getAllData } = require("../controller/obsrepController");
+const {
+  getData,
+  getAllData,
+  getAllDataApproved,
+  updateStatusResolved,
+} = require("../controller/obsrepController");
 //POST
 router.post("/extract/text", upload.single("imageReport"), imageExtract);
 router.post(
@@ -66,6 +71,7 @@ router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
 router.get("/admin/obstruction", isAuthenticated, Admin, getAllobstructions);
 router.get("/admin/report/:id", isAuthenticated, Admin, getSingleReport);
+router.get("/admin/obstruction/report/approved", isAuthenticated, Admin, getAllDataApproved);
 router.get(
   "/admin/obstruction/:id",
   isAuthenticated,
@@ -89,6 +95,13 @@ router.put(
   isAuthenticated,
   Admin,
   updateObstructionViolations
+);
+router.put(
+  "/update-status/:id",
+  upload.array("images", 2),
+  isAuthenticated,
+  Admin,
+  updateStatusResolved
 );
 
 module.exports = router;
