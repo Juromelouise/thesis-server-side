@@ -18,6 +18,10 @@ const obstructionSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  original: {
+    type: String,
+    trim: true,
+  },
   violations: [],
   images: [
     {
