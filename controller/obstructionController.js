@@ -4,7 +4,10 @@ const { uploadMultiple } = require("../utils/cloudinaryUploader");
 exports.createObstruction = async (req, res) => {
   try {
     const reporter = req.user.id;
-    const { location, description, violations } = req.body;
+    req.body.original = req.body.description.original;
+    req.body.description = req.body.description.translation;
+    const { location, description, original, violations } = req.body;
+    // const { location, description, violations } = req.body;
     const images = await uploadMultiple(req.files, "ObstructionImages");
     console.log(images);
 
@@ -12,6 +15,7 @@ exports.createObstruction = async (req, res) => {
       location,
       description,
       images,
+      original,
       reporter,
       violations,
     });
@@ -28,14 +32,17 @@ exports.createObstruction = async (req, res) => {
 exports.updateObstruction = async (req, res) => {
   try {
     // console.log(req.params.id);
-    const { location, description, violations } = req.body;
+    req.body.original = req.body.description.original;
+    req.body.description = req.body.description.translation;
+    const { location, description, original, violations } = req.body;
+    // const { location, description, violations } = req.body;
     let images = [];
     if (req.files?.length > 0) {
       images = await uploadMultiple(req.files, "ObstructionImages");
     }
     const obstruction = await Obstruction.findByIdAndUpdate(
       req.params.id,
-      { location, description, violations, images },
+      { location, description, original, violations, images },
       {
         new: true,
         runValidators: true,

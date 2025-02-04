@@ -2,6 +2,7 @@ const router = require("express").Router();
 const upload = require("../utils/multer");
 
 const { imageExtract } = require("../service/tesseract");
+const { translator } = require("../service/translator");
 const { classifyReport } = require("../service/classifier");
 const {
   createReport,
@@ -34,6 +35,7 @@ router.post(
   "/post/report",
   upload.array("images"),
   isAuthenticated,
+  translator,
   classifyReport,
   createReport
 );
@@ -41,6 +43,7 @@ router.post(
   "/post/obstruction",
   upload.array("images"),
   isAuthenticated,
+  translator,
   classifyReport,
   createObstruction
 );
@@ -53,6 +56,7 @@ router.put(
   "/update/report/:id",
   upload.array("images"),
   isAuthenticated,
+  translator,
   classifyReport,
   updateReport
 );
@@ -60,6 +64,7 @@ router.put(
   "/update/obstruction/:id",
   upload.array("images"),
   isAuthenticated,
+  translator,
   classifyReport,
   updateObstruction
 );
@@ -71,7 +76,12 @@ router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
 router.get("/admin/obstruction", isAuthenticated, Admin, getAllobstructions);
 router.get("/admin/report/:id", isAuthenticated, Admin, getSingleReport);
-router.get("/admin/obstruction/report/approved", isAuthenticated, Admin, getAllDataApproved);
+router.get(
+  "/admin/obstruction/report/approved",
+  isAuthenticated,
+  Admin,
+  getAllDataApproved
+);
 router.get(
   "/admin/obstruction/:id",
   isAuthenticated,

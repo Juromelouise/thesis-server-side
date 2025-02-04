@@ -4,17 +4,37 @@ const { uploadMultiple } = require("../utils/cloudinaryUploader");
 
 exports.createReport = async (req, res) => {
   try {
+    console.log(req.body);
+    let plate;
     const reporter = req.user.id;
-    const { location, description, plateNumber, violations } = req.body;
+    req.body.original = req.body.description.original;
+    req.body.description = req.body.description.translation;
+    const { location, description, original, plateNumber, violations } =
+      req.body;
     const images = await uploadMultiple(req.files, "ReportImages");
-    // console.log(images);
 
-    const plate = await PlateNumber.create({ plateNumber, violations });
+    if (plateNumber) {
+      const ple = await PlateNumber.findOne({ plateNumber });
+      if (ple) {
+        plate = await PlateNumber.findByIdAndUpdate(
+          ple._id,
+          {
+            count: ple.count + 1,
+          },
+          { new: true }
+        );
+      } else {
+        plate = await PlateNumber.create({ plateNumber, violations });
+      }
+    }
+
+    // const plate = await PlateNumber.create({ plateNumber, violations });
 
     const report = await Report.create({
       location,
       description,
       images,
+      original,
       reporter,
       plateNumber: plate._id,
     });
@@ -32,7 +52,10 @@ exports.createReport = async (req, res) => {
 exports.updateReport = async (req, res) => {
   try {
     console.log(req.params.id);
-    const { location, description, plateNumber, violations } = req.body;
+    req.body.original = req.body.description.original;
+    req.body.description = req.body.description.translation;
+    const { location, description, original, plateNumber, violations } =
+      req.body;
     let images = [];
     if (req.files?.length > 0) {
       images = await uploadMultiple(req.files, "ReportImages");
@@ -42,7 +65,7 @@ exports.updateReport = async (req, res) => {
 
     const report = await Report.findByIdAndUpdate(
       req.params.id,
-      { location, description, images, plateNumber: plate._id },
+      { location, description, original, images, plateNumber: plate._id },
       {
         new: true,
         runValidators: true,
@@ -106,7 +129,9 @@ exports.updateReportStatus = async (req, res) => {
         { new: true }
       );
     } else {
-      return res.status(400).json({ message: "Report status can be updated only three times" });
+      return res
+        .status(400)
+        .json({ message: "Report status can be updated only three times" });
     }
 
     if (!report) {

@@ -24,6 +24,10 @@ const reportSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  original: {
+    type: String,
+    trim: true,
+  },
   images: [
     {
       public_id: {
