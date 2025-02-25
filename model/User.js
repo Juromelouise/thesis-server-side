@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const populate = require("mongoose-autopopulate");
 const validator = require("validator");
+const mongooseDelete = require("mongoose-delete");
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -95,5 +96,6 @@ userSchema.methods.getResetPasswordToken = function () {
 };
 
 userSchema.plugin(populate);
+userSchema.plugin(mongooseDelete, { overrideMethods: "all" });
 
 module.exports = mongoose.model("User", userSchema);

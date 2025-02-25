@@ -13,6 +13,15 @@ exports.createReport = async (req, res) => {
       req.body;
     const images = await uploadMultiple(req.files, "ReportImages");
 
+    const report = await Report.create({
+      location,
+      description,
+      images,
+      original,
+      reporter,
+      plateNumber: null, // Initialize with null, will update later if plateNumber exists
+    });
+
     if (plateNumber) {
       const ple = await PlateNumber.findOne({ plateNumber });
       if (ple) {
@@ -20,24 +29,31 @@ exports.createReport = async (req, res) => {
           ple._id,
           {
             count: ple.count + 1,
+            $push: {
+              violations: {
+                report: report._id,
+                types: violations,
+              },
+            },
           },
           { new: true }
         );
       } else {
-        plate = await PlateNumber.create({ plateNumber, violations });
+        plate = await PlateNumber.create({
+          plateNumber,
+          violations: [
+            {
+              report: report._id,
+              types: violations,
+            },
+          ],
+        });
       }
+
+      // Update the report with the plateNumber reference
+      report.plateNumber = plate._id;
+      await report.save();
     }
-
-    // const plate = await PlateNumber.create({ plateNumber, violations });
-
-    const report = await Report.create({
-      location,
-      description,
-      images,
-      original,
-      reporter,
-      plateNumber: plate._id,
-    });
 
     res.status(200).json({
       report,
@@ -48,10 +64,10 @@ exports.createReport = async (req, res) => {
     res.status(500).json({ error: "Failed to create report" });
   }
 };
-
 exports.updateReport = async (req, res) => {
   try {
     console.log(req.params.id);
+    let plate;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
     const { location, description, original, plateNumber, violations } =
@@ -60,28 +76,79 @@ exports.updateReport = async (req, res) => {
     if (req.files?.length > 0) {
       images = await uploadMultiple(req.files, "ReportImages");
     }
-    const plate = await PlateNumber.create({ plateNumber, violations });
-    console.log(plate);
 
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { location, description, original, images, plateNumber: plate._id },
-      {
-        new: true,
-        runValidators: true,
+    const report = await Report.findById(req.params.id);
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    if (
+      plateNumber &&
+      report.plateNumber &&
+      report.plateNumber.toString() !== plateNumber
+    ) {
+      await PlateNumber.findByIdAndUpdate(report.plateNumber, {
+        $pull: { violations: { report: report._id } },
+        $inc: { count: -1 },
+      });
+    }
+
+    report.location = location;
+    report.description = description;
+    report.original = original;
+    report.images = images;
+
+    if (plateNumber) {
+      const ple = await PlateNumber.findOne({ plateNumber });
+      if (ple) {
+        plate = await PlateNumber.findByIdAndUpdate(
+          ple._id,
+          {
+            $push: {
+              violations: {
+                report: report._id,
+                types: violations,
+              },
+            },
+            $inc: { count: 1 },
+          },
+          { new: true }
+        );
+      } else {
+        plate = await PlateNumber.create({
+          plateNumber,
+          violations: [
+            {
+              report: report._id,
+              types: violations,
+            },
+          ],
+        });
       }
-    );
-    res.status(201).json({ message: "Report is Updated", report: report });
+
+      report.plateNumber = plate._id;
+    }
+
+    await report.save();
+
+    res.status(201).json({ message: "Report is Updated", report });
   } catch (e) {
     console.log("Error in Updated Report:" + e);
     res.status(500).json({ message: "Error in updating report" });
   }
 };
 
-exports.deleteReport = async (req, res) => {
+exports.deleteReport = async (req, res, next) => {
   try {
     console.log(req.params.id);
-    await Report.findByIdAndDelete(req.params.id);
+    const report = await Report.findById(req.params.id);
+    await PlateNumber.findByIdAndUpdate(report.plateNumber, {
+      $inc: { count: -1 },
+    });
+    if (report) {
+      await report.remove();
+    }
     res.status(200).json({ success: true });
   } catch (e) {
     console.log("Error in deleting report: " + e);
@@ -91,13 +158,15 @@ exports.deleteReport = async (req, res) => {
 
 exports.getAllDataAdmin = async (req, res) => {
   try {
-    const data = await Report.find();
-    // const data = await Report.find();
-    console.log(data);
-    res.status(200).json({ data });
+    const plateNumbers = await PlateNumber.find();
+    const allViolations = plateNumbers.reduce((acc, plateNumber) => {
+      return acc.concat(plateNumber.violations);
+    }, []);
+    // console.log(allViolations);
+    res.status(200).json({ data: allViolations });
   } catch (e) {
-    console.log("Error in deleting report: " + e);
-    res.status(500).json({ message: "Error in deleting report" });
+    console.log("Error in fetching violations: " + e);
+    res.status(500).json({ message: "Error in fetching violations" });
   }
 };
 
@@ -116,6 +185,7 @@ exports.getSingleReport = async (req, res) => {
 
 exports.updateReportStatus = async (req, res) => {
   try {
+    console.log(req.body);
     let report;
     const editableStatus = await Report.findById(req.params.id);
 
@@ -124,6 +194,7 @@ exports.updateReportStatus = async (req, res) => {
         req.params.id,
         {
           status: req.body.status,
+          reason: req.body.reason,
           editableStatus: editableStatus.editableStatus + 1,
         },
         { new: true }

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongooseDelete = require("mongoose-delete");
 
 const announcementSchema = new mongoose.Schema({
   title: {
@@ -11,13 +12,15 @@ const announcementSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  // picture: {
-  //   type: String,
-  // },
+  picture: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+announcementSchema.plugin(mongooseDelete, { overrideMethods: "all" });
 
 module.exports = mongoose.model("Announcement", announcementSchema);

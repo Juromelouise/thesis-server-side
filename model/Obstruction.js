@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const populate = require("mongoose-autopopulate");
+const mongooseDelete = require("mongoose-delete");
 
 const obstructionSchema = new mongoose.Schema({
   reporter: {
@@ -58,6 +59,10 @@ const obstructionSchema = new mongoose.Schema({
       },
     },
   ],
+  reason: {
+    type: String,
+    trim: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -65,4 +70,5 @@ const obstructionSchema = new mongoose.Schema({
 });
 
 obstructionSchema.plugin(populate);
+obstructionSchema.plugin(mongooseDelete, { overrideMethods: "all" });
 module.exports = mongoose.model("Obstruction", obstructionSchema);
