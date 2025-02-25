@@ -10,13 +10,6 @@ const announce = require("./router/announcement");
 const report = require("./router/report");
 const plateNumber = require("./router/plateNumber");
 
-// app.use(
-//   cors({
-//     origin: `${process.env.ORIGIN}`,
-//     // origin: "http://localhost:5173",
-//     credentials: true,
-//   })
-// );
 app.use(cors());
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));

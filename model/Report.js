@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const populate = require("mongoose-autopopulate");
+const PlateNumber = require("./PlateNumber");
+const mongooseDelete = require("mongoose-delete");
 
 const reportSchema = new mongoose.Schema({
   reporter: {
@@ -11,7 +13,6 @@ const reportSchema = new mongoose.Schema({
   plateNumber: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "PlateNumber",
-    required: true,
     autopopulate: true,
   },
   location: {
@@ -63,12 +64,32 @@ const reportSchema = new mongoose.Schema({
       },
     },
   ],
+  reason: {
+    type: String,
+    trim: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
+reportSchema.methods.remove = async function (next) {
+  try {
+    await PlateNumber.updateMany(
+      { "violations.report": this._id },
+      { $pull: { violations: { report: this._id } } }
+    );
+    await this.delete({ _id: this._id });
+    // next();
+    return;
+  } catch (err) {
+    // next(err);
+    return err;
+  }
+};
+
 reportSchema.plugin(populate);
+reportSchema.plugin(mongooseDelete, { overrideMethods: "all" });
 
 module.exports = mongoose.model("Report", reportSchema);

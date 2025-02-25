@@ -5,7 +5,6 @@ const path = require("path");
 const { URLSearchParams } = require("url");
 
 exports.registerUser = async (req, res) => {
-  // console.log(req.body);
   try {
     let image;
     if (req.file) {
