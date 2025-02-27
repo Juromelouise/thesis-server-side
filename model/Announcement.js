@@ -12,9 +12,18 @@ const announcementSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  picture: {
-    type: String,
-  },
+  picture: [
+    {
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
