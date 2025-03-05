@@ -11,7 +11,6 @@ const {
 const { isAuthenticated } = require("../middleware/auth");
 
 router.post("/register", upload.single("avatar", 1), registerUser);
-router.post("/login", loginUser);
 router.get("/logout", logout);
 router.get("/profile", isAuthenticated, profile);
 
