@@ -15,13 +15,12 @@ const userSchema = new mongoose.Schema({
   },
   lastName: {
     type: String,
-    // required: true,
     trim: true,
+    required: true,
     trim: true,
   },
   phoneNumber: {
     type: String,
-    trim: true,
     trim: true,
   },
   address: {
@@ -51,9 +50,6 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
   },
-  // avatar: {
-  //   type: String,
-  // },
   role: {
     type: String,
     default: "user",

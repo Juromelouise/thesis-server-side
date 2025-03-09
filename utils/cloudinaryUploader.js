@@ -1,8 +1,17 @@
 const cloudinary = require("cloudinary");
+const fs = require("fs");
 
 exports.uploadSingle = async (postImage, folderName) => {
   const result = await cloudinary.v2.uploader.upload(postImage, {
     folder: `Thesis/${folderName}`,
+  });
+
+  fs.unlink(postImage, (err) => {
+    if (err) {
+      console.error("Failed to delete local file:", err);
+    } else {
+      console.log("Successfully deleted local file");
+    }
   });
 
   return {
@@ -23,6 +32,14 @@ exports.uploadMultiple = async (postImages, folderName) => {
     images.push({
       public_id: result.public_id,
       url: result.secure_url,
+    });
+
+    fs.unlink(image, (err) => {
+      if (err) {
+        console.error("Failed to delete local file:", err);
+      } else {
+        console.log("Successfully deleted local file");
+      }
     });
   }
 
