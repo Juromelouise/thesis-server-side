@@ -47,6 +47,29 @@ exports.profile = async (req, res) => {
   });
 };
 
-// exports.updateProfile = async (req, res) => {
-
-// };
+exports.updateProfile = async (req, res) => {
+  try {
+    if (req.file) {
+      const avatar = await uploadSingle(req.file.path, "Avatar");
+      req.body.avatar = avatar;
+      const user = await User.findByIdAndUpdate(req.user._id, req.body, {
+        new: true,
+      });
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } else {
+      const user = await User.findByIdAndUpdate(req.user._id, req.body, {
+        new: true,
+      });
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    }
+  } catch (e) {
+    console.error("Error in Updating Profile: ", e);
+    res.status(500).json({ message: "Error in Updating Profile" });
+  }
+};

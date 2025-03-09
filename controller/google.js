@@ -8,7 +8,7 @@ exports.mobile = async (req, res) => {
   const firstName = req.body.given_name;
   const lastName = req.body.family_name;
   const email = req.body.email;
-  const avatar = await uploadSingle(req.body.picture);
+  const avatar = await uploadSingle(req.body.picture, "Avatar");
   // console.log(avatar)
   // const avatar = req.body.picture;
 
@@ -55,7 +55,7 @@ exports.google = async (req, res, next) => {
   try {
     const firstName = req.body.name;
     const email = req.body.email;
-    const avatar = await uploadSingle(req.body.avatar);
+    const avatar = await uploadSingle(req.body.avatar, "Avatar");
 
     const body = { firstName, email, avatar };
 

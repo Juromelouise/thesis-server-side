@@ -1,22 +1,67 @@
 const Report = require("../model/Report");
 const PlateNumber = require("../model/PlateNumber");
+const axios = require("axios");
 const { uploadMultiple } = require("../utils/cloudinaryUploader");
+const FormData = require("form-data");
+const fs = require("fs").promises;
+const path = require("path");
+
+const ensureTempDirectoryExists = async () => {
+  const tempDir = path.join(__dirname, "../temp");
+  try {
+    await fs.mkdir(tempDir, { recursive: true });
+  } catch (err) {
+    console.error("Error creating temp directory:", err);
+  }
+};
+
+const blurImages = async (files) => {
+  const blurredImages = [];
+
+  await ensureTempDirectoryExists();
+
+  for (const file of files) {
+    const formData = new FormData();
+    const fileBuffer = await fs.readFile(file.path);
+    formData.append("file", fileBuffer, file.originalname);
+
+    const response = await axios.post(`${process.env.CURL_API}/blur/images`, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+      responseType: 'arraybuffer',
+    });
+
+    const blurredImage = Buffer.from(response.data, 'binary');
+    const blurredImagePath = path.join(__dirname, "../temp", file.originalname);
+    await fs.writeFile(blurredImagePath, blurredImage);
+    blurredImages.push({ path: blurredImagePath, originalname: file.originalname });
+  }
+
+  return blurredImages;
+};
 
 exports.createReport = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.files);
+    // console.log(req.body);
     let plate;
     const reporter = req.user.id;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations } =
-      req.body;
-    const images = await uploadMultiple(req.files, "ReportImages");
+    const { location, description, original, plateNumber, violations } = req.body;
+
+    // Blur images
+    const blurredImages = await blurImages(req.files);
+
+    const images = await uploadMultiple(blurredImages, "ReportImages/Blurred");
+    const imagesAdmin = await uploadMultiple(req.files, "ReportImages");
 
     const report = await Report.create({
       location,
       description,
       images,
+      imagesAdmin,
       original,
       reporter,
       plateNumber: null, // Initialize with null, will update later if plateNumber exists
@@ -64,17 +109,22 @@ exports.createReport = async (req, res) => {
     res.status(500).json({ error: "Failed to create report" });
   }
 };
+
 exports.updateReport = async (req, res) => {
   try {
     console.log(req.params.id);
     let plate;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations } =
-      req.body;
+    const { location, description, original, plateNumber, violations } = req.body;
+
+    // Blur images if there are new files
     let images = [];
+    let imagesAdmin = []
     if (req.files?.length > 0) {
-      images = await uploadMultiple(req.files, "ReportImages");
+      const blurredImages = await blurImages(req.files);
+      images = await uploadMultiple(blurredImages, "ReportImages");
+      imagesAdmin = await uploadMultiple(req.files, "ReportImages");
     }
 
     const report = await Report.findById(req.params.id);
@@ -83,11 +133,7 @@ exports.updateReport = async (req, res) => {
       return res.status(404).json({ message: "Report not found" });
     }
 
-    if (
-      plateNumber &&
-      report.plateNumber &&
-      report.plateNumber.toString() !== plateNumber
-    ) {
+    if (plateNumber && report.plateNumber && report.plateNumber.toString() !== plateNumber) {
       await PlateNumber.findByIdAndUpdate(report.plateNumber, {
         $pull: { violations: { report: report._id } },
         $inc: { count: -1 },
@@ -98,6 +144,7 @@ exports.updateReport = async (req, res) => {
     report.description = description;
     report.original = original;
     report.images = images;
+    report.imagesAdmin = imagesAdmin;
 
     if (plateNumber) {
       const ple = await PlateNumber.findOne({ plateNumber });
@@ -138,6 +185,7 @@ exports.updateReport = async (req, res) => {
     res.status(500).json({ message: "Error in updating report" });
   }
 };
+
 
 exports.deleteReport = async (req, res, next) => {
   try {

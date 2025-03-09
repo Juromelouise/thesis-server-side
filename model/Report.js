@@ -41,6 +41,18 @@ const reportSchema = new mongoose.Schema({
       },
     },
   ],
+  imagesAdmin: [
+    {
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
   status: {
     type: String,
     required: true,
