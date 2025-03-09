@@ -44,12 +44,12 @@ const blurImages = async (files) => {
 exports.createReport = async (req, res) => {
   try {
     // console.log(req.files);
-    // console.log(req.body);
+    console.log(req.body);
     let plate;
     const reporter = req.user.id;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations } = req.body;
+    const { location, description, original, plateNumber, violations, postIt } = req.body;
 
     // Blur images
     const blurredImages = await blurImages(req.files);
@@ -64,6 +64,7 @@ exports.createReport = async (req, res) => {
       imagesAdmin,
       original,
       reporter,
+      postIt,
       plateNumber: null, // Initialize with null, will update later if plateNumber exists
     });
 
@@ -116,7 +117,7 @@ exports.updateReport = async (req, res) => {
     let plate;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations } = req.body;
+    const { location, description, original, plateNumber, violations, postIt } = req.body;
 
     // Blur images if there are new files
     let images = [];
@@ -145,6 +146,7 @@ exports.updateReport = async (req, res) => {
     report.original = original;
     report.images = images;
     report.imagesAdmin = imagesAdmin;
+    report.postIt = postIt;
 
     if (plateNumber) {
       const ple = await PlateNumber.findOne({ plateNumber });

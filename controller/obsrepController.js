@@ -4,10 +4,19 @@ const { uploadMultiple } = require("../utils/cloudinaryUploader");
 
 exports.getData = async (req, res) => {
   try {
-    const reports = await Report.find({ reporter: req.user.id });
-    const obstructions = await Obstruction.find({ reporter: req.user.id });
+    const reports = await Report.find({ reporter: req.user.id }).select("createdAt location description");
+    const obstructions = await Obstruction.find({ reporter: req.user.id }).select("createdAt location description");
 
-    const data = [...reports, ...obstructions];
+    const data = [...reports, ...obstructions].map(item => ({
+      createdAt: item.createdAt,
+      location: item.location,
+      description: item.description,
+      _id: item._id,
+      plateNumber: item.plateNumber ? true : false
+    }));
+    console.log(data)
+    // const data = [...reports, ...obstructions]
+    // console.log(data)
 
     res.status(200).json({ data: data });
   } catch (e) {
@@ -50,7 +59,7 @@ exports.updateStatusResolved = async (req, res) => {
   try {
     const { status } = req.body;
     // console.log(req.params.id);
-    
+
     const images = await uploadMultiple(req.files, "ConfirmationImages");
     let report = await Report.findByIdAndUpdate(
       req.params.id,

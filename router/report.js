@@ -74,7 +74,7 @@ router.delete("/delete/obstruction/:id", isAuthenticated, deleteObstruction);
 //ADMIN
 router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
 router.get("/admin/obstruction", isAuthenticated, Admin, getAllobstructions);
-router.get("/admin/report/:id", isAuthenticated, Admin, getSingleReport);
+router.get("/admin/report/:id", isAuthenticated, getSingleReport);
 router.get(
   "/admin/obstruction/report/approved",
   isAuthenticated,
@@ -84,7 +84,7 @@ router.get(
 router.get(
   "/admin/obstruction/:id",
   isAuthenticated,
-  Admin,
+  // Admin,
   getSingleObstruction
 );
 router.put(

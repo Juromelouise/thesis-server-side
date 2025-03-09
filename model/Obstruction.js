@@ -63,6 +63,10 @@ const obstructionSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  postIt: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
