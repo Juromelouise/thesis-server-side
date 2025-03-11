@@ -207,13 +207,38 @@ exports.deleteReport = async (req, res, next) => {
 };
 
 exports.getAllDataAdmin = async (req, res) => {
+  console.log(req.query)
   try {
-    const plateNumbers = await PlateNumber.find();
-    const allViolations = plateNumbers.reduce((acc, plateNumber) => {
-      return acc.concat(plateNumber.violations);
-    }, []);
-    // console.log(allViolations);
-    res.status(200).json({ data: allViolations });
+    const { page = 1, limit = 10 } = req.query; // Get page and limit from query, default to page 1 and limit 10
+
+    const plateNumbers = await PlateNumber.find().populate({
+      path: 'violations.report',
+      select: 'location description createdAt'
+    }).select('plateNumber violations createdAt');
+
+    const allViolations = plateNumbers.flatMap(plateNumber => 
+      plateNumber.violations.map(violation => ({
+        plateNumber: plateNumber.plateNumber,
+        location: violation.report.location,
+        description: violation.report.description,
+        createdAt: violation.report.createdAt,
+        types: violation.types,
+        status: violation.report.status,
+        _id: violation.report._id
+      }))
+    );
+
+    // Paginate the results
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedViolations = allViolations.slice(startIndex, endIndex);
+
+    res.status(200).json({
+      data: paginatedViolations,
+      totalItems: allViolations.length,
+      totalPages: Math.ceil(allViolations.length / limit),
+      currentPage: parseInt(page),
+    });
   } catch (e) {
     console.log("Error in fetching violations: " + e);
     res.status(500).json({ message: "Error in fetching violations" });
