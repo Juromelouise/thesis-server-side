@@ -3,11 +3,6 @@ const plateNumber = require("../model/PlateNumber");
 exports.changeViolation = async (req, res) => {
   try {
     const { violations } = req.body;
-    // const plate = await plateNumber.findByIdAndUpdate(
-    //   req.params.id,
-    //   { violations },
-    //   { new: true }
-    // );
     const plate = await plateNumber.findOneAndUpdate(
       { "violations.report": req.params.id },
       { $set: { "violations.$.types": violations } },
@@ -22,8 +17,21 @@ exports.changeViolation = async (req, res) => {
 
 exports.getAllPlateNumbers = async (req, res) => {
   try {
-    const plateNumbers = await plateNumber.find({ count: { $gt: 0 } });
-    res.status(200).json({ plateNumbers });
+    const { page = 1, limit = 10 } = req.query;
+    const plateNumbers = await plateNumber.find({ count: { $gt: 0 } })
+      .select('plateNumber violations.types count')
+      .lean();
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const paginatedPlateNumbers = plateNumbers.slice(startIndex, endIndex);
+
+    res.status(200).json({
+      data: paginatedPlateNumbers,
+      totalItems: plateNumbers.length,
+      totalPages: Math.ceil(plateNumbers.length / limit),
+      currentPage: parseInt(page),
+    });
   } catch (error) {
     console.error("Error getting all plate numbers:", error);
     res.status(500).json({ message: "Failed to get all plate numbers." });

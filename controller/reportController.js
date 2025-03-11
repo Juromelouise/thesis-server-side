@@ -25,17 +25,24 @@ const blurImages = async (files) => {
     const fileBuffer = await fs.readFile(file.path);
     formData.append("file", fileBuffer, file.originalname);
 
-    const response = await axios.post(`${process.env.CURL_API}/blur/images`, formData, {
-      headers: {
-        ...formData.getHeaders(),
-      },
-      responseType: 'arraybuffer',
-    });
+    const response = await axios.post(
+      `${process.env.CURL_API}/blur/images`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+        },
+        responseType: "arraybuffer",
+      }
+    );
 
-    const blurredImage = Buffer.from(response.data, 'binary');
+    const blurredImage = Buffer.from(response.data, "binary");
     const blurredImagePath = path.join(__dirname, "../temp", file.originalname);
     await fs.writeFile(blurredImagePath, blurredImage);
-    blurredImages.push({ path: blurredImagePath, originalname: file.originalname });
+    blurredImages.push({
+      path: blurredImagePath,
+      originalname: file.originalname,
+    });
   }
 
   return blurredImages;
@@ -49,7 +56,8 @@ exports.createReport = async (req, res) => {
     const reporter = req.user.id;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations, postIt } = req.body;
+    const { location, description, original, plateNumber, violations, postIt } =
+      req.body;
 
     // Blur images
     const blurredImages = await blurImages(req.files);
@@ -117,11 +125,12 @@ exports.updateReport = async (req, res) => {
     let plate;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
-    const { location, description, original, plateNumber, violations, postIt } = req.body;
+    const { location, description, original, plateNumber, violations, postIt } =
+      req.body;
 
     // Blur images if there are new files
     let images = [];
-    let imagesAdmin = []
+    let imagesAdmin = [];
     if (req.files?.length > 0) {
       const blurredImages = await blurImages(req.files);
       images = await uploadMultiple(blurredImages, "ReportImages");
@@ -134,7 +143,11 @@ exports.updateReport = async (req, res) => {
       return res.status(404).json({ message: "Report not found" });
     }
 
-    if (plateNumber && report.plateNumber && report.plateNumber.toString() !== plateNumber) {
+    if (
+      plateNumber &&
+      report.plateNumber &&
+      report.plateNumber.toString() !== plateNumber
+    ) {
       await PlateNumber.findByIdAndUpdate(report.plateNumber, {
         $pull: { violations: { report: report._id } },
         $inc: { count: -1 },
@@ -188,7 +201,6 @@ exports.updateReport = async (req, res) => {
   }
 };
 
-
 exports.deleteReport = async (req, res, next) => {
   try {
     console.log(req.params.id);
@@ -207,28 +219,29 @@ exports.deleteReport = async (req, res, next) => {
 };
 
 exports.getAllDataAdmin = async (req, res) => {
-  console.log(req.query)
+  console.log(req.query);
   try {
     const { page = 1, limit = 10 } = req.query; // Get page and limit from query, default to page 1 and limit 10
 
-    const plateNumbers = await PlateNumber.find().populate({
-      path: 'violations.report',
-      select: 'location description createdAt'
-    }).select('plateNumber violations createdAt');
+    const plateNumbers = await PlateNumber.find()
+      .populate({
+        path: "violations.report",
+        select: "location description createdAt",
+      })
+      .select("plateNumber violations createdAt");
 
-    const allViolations = plateNumbers.flatMap(plateNumber => 
-      plateNumber.violations.map(violation => ({
+    const allViolations = plateNumbers.flatMap((plateNumber) =>
+      plateNumber.violations.map((violation) => ({
         plateNumber: plateNumber.plateNumber,
         location: violation.report.location,
         description: violation.report.description,
         createdAt: violation.report.createdAt,
         types: violation.types,
         status: violation.report.status,
-        _id: violation.report._id
+        _id: violation.report._id,
       }))
     );
-
-    // Paginate the results
+    
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     const paginatedViolations = allViolations.slice(startIndex, endIndex);
@@ -248,10 +261,24 @@ exports.getAllDataAdmin = async (req, res) => {
 exports.getSingleReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
+
     if (!report) {
       return res.status(404).json({ message: "Report not found" });
     }
-    res.status(200).json({ report });
+
+    const violationTypes = report.plateNumber.violations
+      .filter((violation) => violation.report._id.toString() === req.params.id)
+      .map((violation) => violation.types);
+
+    const reportData = {
+      ...report.toObject(),
+      plateNumber: {
+        ...report.plateNumber.toObject(),
+        violations: violationTypes,
+      },
+    };
+
+    res.status(200).json({ report: reportData });
   } catch (error) {
     console.error("Error fetching report:", error);
     res.status(500).json({ message: "Error in fetching report" });
