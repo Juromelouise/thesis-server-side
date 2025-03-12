@@ -18,8 +18,9 @@ exports.changeViolation = async (req, res) => {
 exports.getAllPlateNumbers = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const plateNumbers = await plateNumber.find({ count: { $gt: 0 } })
-      .select('plateNumber violations.types count')
+    const plateNumbers = await plateNumber
+      .find({ count: { $gt: 0 } })
+      .select("plateNumber violations.types count")
       .lean();
 
     const startIndex = (page - 1) * limit;

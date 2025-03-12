@@ -28,6 +28,7 @@ const {
   getAllDataApproved,
   updateStatusResolved,
 } = require("../controller/obsrepController");
+
 //POST
 router.post("/extract/text", upload.single("imageReport"), imageExtract);
 router.post(
@@ -91,7 +92,7 @@ router.put(
   "/admin/report/status/:id",
   isAuthenticated,
   Admin,
-  updateReportStatus
+  updateReportStatus,
 );
 router.put(
   "/admin/obstruction/status/:id",

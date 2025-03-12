@@ -30,6 +30,10 @@ const plateNumberSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  offense:{
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

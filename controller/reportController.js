@@ -241,7 +241,7 @@ exports.getAllDataAdmin = async (req, res) => {
         _id: violation.report._id,
       }))
     );
-    
+
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     const paginatedViolations = allViolations.slice(startIndex, endIndex);
@@ -285,9 +285,8 @@ exports.getSingleReport = async (req, res) => {
   }
 };
 
-exports.updateReportStatus = async (req, res) => {
+exports.updateReportStatus = async (req, res, next) => {
   try {
-    console.log(req.body);
     let report;
     const editableStatus = await Report.findById(req.params.id);
 
@@ -297,10 +296,20 @@ exports.updateReportStatus = async (req, res) => {
         {
           status: req.body.status,
           reason: req.body.reason,
-          editableStatus: editableStatus.editableStatus + 1,
+          // editableStatus: editableStatus.editableStatus + 1,
         },
         { new: true }
       );
+      if (editableStatus.editableStatus === 0) {
+        const plate = await PlateNumber.findByIdAndUpdate(
+          report.plateNumber._id.toString(),
+          {
+            $inc: { offense: 1 },
+          },
+          { new: true }
+        );
+        console.log(plate);
+      }
     } else {
       return res
         .status(400)
@@ -310,9 +319,9 @@ exports.updateReportStatus = async (req, res) => {
     if (!report) {
       return res.status(404).json({ message: "Report not found" });
     }
-    console.log(report);
-
-    res.status(200).json({ report });
+    req.report = report;
+    // next();
+    // res.status(200).json({ report });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }

@@ -35,8 +35,6 @@ exports.logout = async (req, res, next) => {
     success: true,
     message: "Logged out",
   });
-
-  console.log("logout");
 };
 
 exports.profile = async (req, res) => {
@@ -72,4 +70,23 @@ exports.updateProfile = async (req, res) => {
     console.error("Error in Updating Profile: ", e);
     res.status(500).json({ message: "Error in Updating Profile" });
   }
+};
+
+exports.loginUser = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Please enter email & password" });
+  }
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    return res.status(401).json({ error: "Invalid Email or Password" });
+  }
+  const isPasswordMatched = await user.comparePassword(password);
+
+  if (!isPasswordMatched) {
+    return res.status(401).json({ error: "Invalid Email or Password" });
+  }
+  sendToken(user, 200, res);
 };
