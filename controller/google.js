@@ -9,23 +9,16 @@ exports.mobile = async (req, res) => {
   const lastName = req.body.family_name;
   const email = req.body.email;
   const avatar = await uploadSingle(req.body.picture, "Avatar");
-  // console.log(avatar)
-  // const avatar = req.body.picture;
 
   const body = { firstName, lastName, email, avatar };
 
   try {
-    // Check if the user exists in the database
-
     const loginUser = await User.findOne({ email });
 
     if (loginUser) {
-      // If user exists, send token
       sendToken(loginUser, 200, res);
     } else {
-      // If user does not exist, create a new user
       const randomPassword = Math.random().toString(36).slice(-8);
-      console.log(randomPassword);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(randomPassword, salt);
 
@@ -38,8 +31,6 @@ exports.mobile = async (req, res) => {
           message: "User not created",
         });
       }
-
-      // Send token for newly created user
       sendToken(newUser, 200, res);
     }
   } catch (error) {
@@ -55,18 +46,16 @@ exports.google = async (req, res, next) => {
   try {
     const firstName = req.body.name;
     const email = req.body.email;
-    const avatar = await uploadSingle(req.body.avatar, "Avatar");
 
-    const body = { firstName, email, avatar };
+    const body = { firstName, email };
 
     const loginUser = await User.findOne({ email });
 
     if (loginUser) {
-      // If user exists, send token
       sendToken(loginUser, 200, res);
     } else {
-      // If user does not exist, create a new user
-      // Generate a random password with a minimum length of 8 characters
+      const avatar = await uploadSingle(req.body.avatar, "Avatar");
+      body.avatar = avatar;
       const randomPassword = Math.random().toString(36).slice(-8);
       console.log(randomPassword);
       const salt = await bcrypt.genSalt(10);
@@ -83,7 +72,6 @@ exports.google = async (req, res, next) => {
         });
       }
 
-      // Send token for newly created user
       sendToken(newUser, 200, res);
     }
   } catch (error) {

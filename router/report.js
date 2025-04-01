@@ -27,6 +27,7 @@ const {
   getAllData,
   getAllDataApproved,
   updateStatusResolved,
+  getAllDataApprovedObstruction,
 } = require("../controller/obsrepController");
 
 //POST
@@ -77,10 +78,16 @@ router.get("/admin/report", isAuthenticated, Admin, getAllDataAdmin);
 router.get("/admin/obstruction", isAuthenticated, Admin, getAllobstructions);
 router.get("/admin/report/:id", isAuthenticated, getSingleReport);
 router.get(
-  "/admin/obstruction/report/approved",
+  "/admin/report/report/approved",
   isAuthenticated,
   Admin,
   getAllDataApproved
+);
+router.get(
+  "/admin/obstruction/report/approved",
+  isAuthenticated,
+  Admin,
+  getAllDataApprovedObstruction
 );
 router.get(
   "/admin/obstruction/:id",
@@ -88,6 +95,8 @@ router.get(
   // Admin,
   getSingleObstruction
 );
+
+//PUT
 router.put(
   "/admin/report/status/:id",
   isAuthenticated,

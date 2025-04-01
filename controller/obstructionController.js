@@ -7,9 +7,8 @@ exports.createObstruction = async (req, res) => {
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
     const { location, description, original, violations } = req.body;
-    // const { location, description, violations } = req.body;
     const images = await uploadMultiple(req.files, "ObstructionImages");
-    console.log(images);
+
 
     const obstruction = await Obstruction.create({
       location,
@@ -31,11 +30,9 @@ exports.createObstruction = async (req, res) => {
 
 exports.updateObstruction = async (req, res) => {
   try {
-    // console.log(req.params.id);
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
     const { location, description, original, violations } = req.body;
-    // const { location, description, violations } = req.body;
     let images = [];
     if (req.files?.length > 0) {
       images = await uploadMultiple(req.files, "ObstructionImages");
@@ -48,7 +45,6 @@ exports.updateObstruction = async (req, res) => {
         runValidators: true,
       }
     );
-    console.log(obstruction);
     res
       .status(201)
       .json({ message: "Obstruction is Updated", obstruction: obstruction });
@@ -71,8 +67,7 @@ exports.deleteObstruction = async (req, res) => {
 
 exports.getAllobstructions = async (req, res) => {
   try {
-    const obstructions = await Obstruction.find();
-    console.log(obstructions);
+    const obstructions = await Obstruction.find();;
     res.status(200).json({ obstructions });
   } catch (e) {
     console.log("Error in getting all obstructions: " + e);
@@ -113,7 +108,6 @@ exports.editableStatusObs = async (req, res) => {
     if (!report) {
       return res.status(404).json({ message: "Report not found" });
     }
-    console.log(report);
 
     res.status(200).json({ report });
   } catch (error) {
@@ -130,7 +124,6 @@ exports.updateObstructionViolations = async (req, res) => {
       { violations },
       { new: true }
     );
-    console.log(obstruction);
     res.status(200).json({ report: obstruction });
   } catch (error) {
     console.error("Error updating violations:", error);

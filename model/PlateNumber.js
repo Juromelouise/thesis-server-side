@@ -30,9 +30,10 @@ const plateNumberSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  offense:{
-    type: Number,
-    default: 0,
+  offense: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Offense",
+    autopopulate: true,
   },
   createdAt: {
     type: Date,
@@ -40,7 +41,7 @@ const plateNumberSchema = new mongoose.Schema({
   },
 });
 
-plateNumberSchema.methods.remove =  async function (next) {
+plateNumberSchema.methods.remove = async function (next) {
   try {
     await Report.updateMany(
       { plateNumber: this._id },

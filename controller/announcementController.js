@@ -1,12 +1,10 @@
 const Announcement = require("../model/Announcement");
-// const { uploadMultiple } = require("../utils/multer");
 const { uploadMultiple } = require("../utils/cloudinaryUploader");
 
 exports.createAnnouncement = async (req, res) => {
   try {
     const { title, description } = req.body;
     const picture = await uploadMultiple(req.files, "AnnouncementPictures");
-    // console.log(picture);
     const announcement = new Announcement({
       title,
       description,

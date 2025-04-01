@@ -17,7 +17,6 @@ exports.registerUser = async (req, res) => {
     }
     req.body.avatar = image;
     const user = await User.create(req.body);
-    console.log(user);
     sendToken(user, 200, res);
   } catch (e) {
     console.error("Error in Creating user: ", e);

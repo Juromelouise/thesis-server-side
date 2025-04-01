@@ -41,7 +41,18 @@ exports.getAllPlateNumbers = async (req, res) => {
 
 exports.getPlateNumber = async (req, res) => {
   try {
-    const data = await plateNumber.findById(req.params.id);
+    const data = await plateNumber.findById(req.params.id).populate({
+      path: 'violations.report',
+      select: 'status'
+    }).lean();
+
+    data.violations = data.violations.map(violation => ({
+      ...violation,
+      status: violation.report.status,
+      id: violation.report._id,
+      report: undefined
+    }));
+
     res.status(200).json({ data });
   } catch (error) {
     console.error("Error getting plate number:", error);

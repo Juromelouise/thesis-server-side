@@ -1,22 +1,24 @@
 const Report = require("../model/Report");
 const Obstruction = require("../model/Obstruction");
+const PlateNumber = require("../model/PlateNumber");
 const { uploadMultiple } = require("../utils/cloudinaryUploader");
 
 exports.getData = async (req, res) => {
   try {
-    const reports = await Report.find({ reporter: req.user.id }).select("createdAt location description");
-    const obstructions = await Obstruction.find({ reporter: req.user.id }).select("createdAt location description");
+    const reports = await Report.find({ reporter: req.user.id }).select(
+      "createdAt location description"
+    );
+    const obstructions = await Obstruction.find({
+      reporter: req.user.id,
+    }).select("createdAt location description");
 
-    const data = [...reports, ...obstructions].map(item => ({
+    const data = [...reports, ...obstructions].map((item) => ({
       createdAt: item.createdAt,
       location: item.location,
       description: item.description,
       _id: item._id,
-      plateNumber: item.plateNumber ? true : false
+      plateNumber: item.plateNumber ? true : false,
     }));
-    console.log(data)
-    // const data = [...reports, ...obstructions]
-    // console.log(data)
 
     res.status(200).json({ data: data });
   } catch (e) {
@@ -45,9 +47,23 @@ exports.getAllData = async (req, res) => {
 
 exports.getAllDataApproved = async (req, res) => {
   try {
-    const report = await Report.find({ status: "Approved" });
-    const obstruction = await Obstruction.find({ status: "Approved" });
-    const data = [...report, ...obstruction];
+    const report = await PlateNumber.aggregate([
+      {
+        $lookup: {
+          from: "reports",
+          localField: "violations.report",
+          foreignField: "_id",
+          as: "reportDetails",
+        },
+      },
+      {
+        $match: {
+          "reportDetails.status": { $ne: "Pending" },
+          count: { $gt: 0 },
+        },
+      },
+    ]);
+    const data = [...report];
     res.status(200).json({ data: data });
   } catch (error) {
     console.log(error);
@@ -55,10 +71,19 @@ exports.getAllDataApproved = async (req, res) => {
   }
 };
 
+exports.getAllDataApprovedObstruction = async (req, res) => {
+  try {
+    const data = await Obstruction.find({ status: "Approved" });
+    res.status(200).json({ data: data });
+  } catch (erro) {
+    console.error(error);
+    res.status(500).json({ message: "Error on Fetching All Approved Data" });
+  }
+};
+
 exports.updateStatusResolved = async (req, res) => {
   try {
     const { status } = req.body;
-    // console.log(req.params.id);
 
     const images = await uploadMultiple(req.files, "ConfirmationImages");
     let report = await Report.findByIdAndUpdate(
@@ -73,7 +98,6 @@ exports.updateStatusResolved = async (req, res) => {
         { new: true }
       );
     }
-    console.log(report);
     res.status(200).json({ message: "Status Updated to Resolved" });
   } catch (error) {
     console.log(error);

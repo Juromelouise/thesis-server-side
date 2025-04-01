@@ -50,8 +50,6 @@ const blurImages = async (files) => {
 
 exports.createReport = async (req, res) => {
   try {
-    // console.log(req.files);
-    console.log(req.body);
     let plate;
     const reporter = req.user.id;
     req.body.original = req.body.description.original;
@@ -59,7 +57,6 @@ exports.createReport = async (req, res) => {
     const { location, description, original, plateNumber, violations, postIt } =
       req.body;
 
-    // Blur images
     const blurredImages = await blurImages(req.files);
 
     const images = await uploadMultiple(blurredImages, "ReportImages/Blurred");
@@ -73,7 +70,7 @@ exports.createReport = async (req, res) => {
       original,
       reporter,
       postIt,
-      plateNumber: null, // Initialize with null, will update later if plateNumber exists
+      plateNumber: null,
     });
 
     if (plateNumber) {
@@ -104,7 +101,6 @@ exports.createReport = async (req, res) => {
         });
       }
 
-      // Update the report with the plateNumber reference
       report.plateNumber = plate._id;
       await report.save();
     }
@@ -121,14 +117,12 @@ exports.createReport = async (req, res) => {
 
 exports.updateReport = async (req, res) => {
   try {
-    console.log(req.params.id);
     let plate;
     req.body.original = req.body.description.original;
     req.body.description = req.body.description.translation;
     const { location, description, original, plateNumber, violations, postIt } =
       req.body;
 
-    // Blur images if there are new files
     let images = [];
     let imagesAdmin = [];
     if (req.files?.length > 0) {
@@ -203,7 +197,6 @@ exports.updateReport = async (req, res) => {
 
 exports.deleteReport = async (req, res, next) => {
   try {
-    console.log(req.params.id);
     const report = await Report.findById(req.params.id);
     await PlateNumber.findByIdAndUpdate(report.plateNumber, {
       $inc: { count: -1 },
@@ -219,18 +212,17 @@ exports.deleteReport = async (req, res, next) => {
 };
 
 exports.getAllDataAdmin = async (req, res) => {
-  console.log(req.query);
   try {
-    const { page = 1, limit = 10 } = req.query; // Get page and limit from query, default to page 1 and limit 10
+    const { page = 1, limit = 10, filterStatus } = req.query;
 
     const plateNumbers = await PlateNumber.find()
       .populate({
         path: "violations.report",
-        select: "location description createdAt",
+        select: "location description createdAt status",
       })
       .select("plateNumber violations createdAt");
 
-    const allViolations = plateNumbers.flatMap((plateNumber) =>
+    let allViolations = plateNumbers.flatMap((plateNumber) =>
       plateNumber.violations.map((violation) => ({
         plateNumber: plateNumber.plateNumber,
         location: violation.report.location,
@@ -241,6 +233,12 @@ exports.getAllDataAdmin = async (req, res) => {
         _id: violation.report._id,
       }))
     );
+    
+    if (filterStatus) {
+      allViolations = allViolations.filter(
+        (violation) => violation.status === filterStatus
+      );
+    }
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -257,7 +255,6 @@ exports.getAllDataAdmin = async (req, res) => {
     res.status(500).json({ message: "Error in fetching violations" });
   }
 };
-
 exports.getSingleReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
@@ -277,7 +274,7 @@ exports.getSingleReport = async (req, res) => {
         violations: violationTypes,
       },
     };
-
+    
     res.status(200).json({ report: reportData });
   } catch (error) {
     console.error("Error fetching report:", error);
@@ -296,7 +293,7 @@ exports.updateReportStatus = async (req, res, next) => {
         {
           status: req.body.status,
           reason: req.body.reason,
-          // editableStatus: editableStatus.editableStatus + 1,
+          editableStatus: editableStatus.editableStatus + 1,
         },
         { new: true }
       );
@@ -321,25 +318,8 @@ exports.updateReportStatus = async (req, res, next) => {
     }
     req.report = report;
     // next();
-    // res.status(200).json({ report });
+    res.status(200).json({ report });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
-// exports.editableStatus = async (req, res) => {
-//   try {
-//     const report = await Report.findByIdAndUpdate(
-//       req.params.id,
-//       { editableStatus: false },
-//       { new: true }
-//     );
-//     if (!report) {
-//       return res.status(404).json({ message: "Report not found" });
-//     }
-//     res.status(200).json({ report });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ message: "Server error", error });
-//   }
-// };

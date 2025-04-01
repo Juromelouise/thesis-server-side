@@ -2,7 +2,6 @@ const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 
 exports.isAuthenticated = async (req, res, next) => {
-  console.log(req.headers.authorization);
   const token = req.headers.authorization;
 
   if (!token) {
@@ -19,7 +18,6 @@ exports.isAuthenticated = async (req, res, next) => {
 };
 
 exports.Admin = async (req, res, next) => {
-  console.log(req.user.role);
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Access denied" });
   }
