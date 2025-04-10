@@ -45,7 +45,6 @@ exports.showAnnouncement = async (req, res) => {
 
 exports.showAnnouncementById = async (req, res) => {
   try {
-    console.log(req.params);
     const { id } = req.params;
     const announcement = await Announcement.findById(id);
     console.log(announcement);

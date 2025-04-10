@@ -56,7 +56,6 @@ exports.updateObstruction = async (req, res) => {
 
 exports.deleteObstruction = async (req, res) => {
   try {
-    console.log(req.params.id);
     await Obstruction.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true });
   } catch (e) {

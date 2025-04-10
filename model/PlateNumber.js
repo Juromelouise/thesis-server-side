@@ -35,6 +35,10 @@ const plateNumberSchema = new mongoose.Schema({
     ref: "Offense",
     autopopulate: true,
   },
+  checkOffense: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

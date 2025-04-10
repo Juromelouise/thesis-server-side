@@ -57,6 +57,26 @@ exports.getAllDataApproved = async (req, res) => {
         },
       },
       {
+        $addFields: {
+          reportDetails: {
+            $filter: {
+              input: "$reportDetails",
+              as: "detail",
+              cond: { $ne: ["$$detail.status", "Disapproved"] },
+            },
+          },
+          violations: {
+            $filter: {
+              input: "$violations",
+              as: "violation",
+              cond: {
+                $in: ["$$violation.report", "$reportDetails._id"],
+              },
+            },
+          },
+        },
+      },
+      {
         $match: {
           "reportDetails.status": { $ne: "Pending" },
           count: { $gt: 0 },
@@ -83,21 +103,22 @@ exports.getAllDataApprovedObstruction = async (req, res) => {
 
 exports.updateStatusResolved = async (req, res) => {
   try {
-    const { status } = req.body;
+    // const { status } = req.body;
+    console.log(req.body);
 
-    const images = await uploadMultiple(req.files, "ConfirmationImages");
-    let report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { status, confirmationImages: images },
-      { new: true }
-    );
-    if (!report) {
-      report = await Obstruction.findByIdAndUpdate(
-        req.params.id,
-        { status, confirmationImages: images },
-        { new: true }
-      );
-    }
+      // const images = await uploadMultiple(req.files, "ConfirmationImages");
+      // let report = await Report.findByIdAndUpdate(
+      //   req.params.id,
+      //   { status, confirmationImages: images },
+      //   { new: true }
+      // );
+      // if (!report) {
+      //   report = await Obstruction.findByIdAndUpdate(
+      //     req.params.id,
+      //     { status, confirmationImages: images },
+      //     { new: true }
+      //   );
+      // }
     res.status(200).json({ message: "Status Updated to Resolved" });
   } catch (error) {
     console.log(error);
