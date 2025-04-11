@@ -6,6 +6,8 @@ const { offenseUpdater } = require("../functions/Offense");
 const FormData = require("form-data");
 const fs = require("fs").promises;
 const path = require("path");
+const { pushNotification } = require("../utils/Notification");
+const { title } = require("process");
 
 const ensureTempDirectoryExists = async () => {
   const tempDir = path.join(__dirname, "../temp");
@@ -17,36 +19,45 @@ const ensureTempDirectoryExists = async () => {
 };
 
 const blurImages = async (files) => {
-  const blurredImages = [];
+  try {
+    const blurredImages = [];
 
-  await ensureTempDirectoryExists();
+    await ensureTempDirectoryExists();
 
-  for (const file of files) {
-    const formData = new FormData();
-    const fileBuffer = await fs.readFile(file.path);
-    formData.append("file", fileBuffer, file.originalname);
+    for (const file of files) {
+      const formData = new FormData();
+      const fileBuffer = await fs.readFile(file.path);
+      formData.append("file", fileBuffer, file.originalname);
 
-    const response = await axios.post(
-      `${process.env.CURL_API}/blur/images`,
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
-        },
-        responseType: "arraybuffer",
-      }
-    );
+      const response = await axios.post(
+        `${process.env.CURL_API}/blur/images`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+          responseType: "arraybuffer",
+        }
+      );
 
-    const blurredImage = Buffer.from(response.data, "binary");
-    const blurredImagePath = path.join(__dirname, "../temp", file.originalname);
-    await fs.writeFile(blurredImagePath, blurredImage);
-    blurredImages.push({
-      path: blurredImagePath,
-      originalname: file.originalname,
-    });
+      const blurredImage = Buffer.from(response.data, "binary");
+      const blurredImagePath = path.join(
+        __dirname,
+        "../temp",
+        file.originalname
+      );
+      await fs.writeFile(blurredImagePath, blurredImage);
+      blurredImages.push({
+        path: blurredImagePath,
+        originalname: file.originalname,
+      });
+    }
+
+    return blurredImages;
+  } catch (error) {
+    console.error("Error in blurImages function:", error);
+    throw error;
   }
-
-  return blurredImages;
 };
 
 exports.createReport = async (req, res) => {
@@ -105,6 +116,13 @@ exports.createReport = async (req, res) => {
       report.plateNumber = plate._id;
       await report.save();
     }
+
+    const data = {
+      title: "Report Submitted Successfully",
+      message: `A new report has been submitted by ${req.user.firstName}. Please review it.`,
+      data: { data: report._id },
+    };
+    await pushNotification(data, req.user.pushToken);
 
     res.status(200).json({
       report,
@@ -299,7 +317,6 @@ exports.updateReportStatus = async (req, res, next) => {
         { new: true }
       );
       await offenseUpdater(report.plateNumber._id, req.body.status);
-
     } else {
       return res
         .status(400)

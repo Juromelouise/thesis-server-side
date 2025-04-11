@@ -7,6 +7,7 @@ const {
   logout,
   profile,
   updateProfile,
+  updatePushToken
 } = require("../controller/userController");
 
 const { isAuthenticated } = require("../middleware/auth");
@@ -16,5 +17,6 @@ router.get("/logout", logout);
 router.get("/profile", isAuthenticated, profile);
 router.post("/login", loginUser);
 router.put("/profile", isAuthenticated, upload.single("avatar", 1), updateProfile);
+router.put("/update-push-token", isAuthenticated, updatePushToken);
 
 module.exports = router;
